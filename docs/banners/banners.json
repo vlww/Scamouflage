@@ -1,0 +1,102 @@
+{
+ "readme-hero": {
+  "height": 280,
+  "loop": 20.0
+ },
+ "readme-try": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "readme-problem": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "readme-features": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "readme-hybrid": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "readme-speed": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "readme-privacy": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "readme-firebase": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "readme-accuracy": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "readme-setup": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "readme-judges": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "readme-project": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-hero": {
+  "height": 280,
+  "loop": 20.0
+ },
+ "devpost-value": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-inspiration": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-what": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-ailogic": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-how": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-design": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-impact": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-challenges": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-accomplishments": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-learned": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-next": {
+  "height": 150,
+  "loop": 20.0
+ },
+ "devpost-hackathon": {
+  "height": 150,
+  "loop": 20.0
+ }
+}
