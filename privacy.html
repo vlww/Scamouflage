@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Privacy policy · Scamouflage</title>
+    <meta name="description" content="What Scamouflage reads, what it sends, and what it stores." />
+    <link rel="icon" href="/icons/icon32.png" />
+    <link rel="stylesheet" href="./src/site.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/" aria-label="Scamouflage home">
+        <img src="/icons/icon48.png" alt="" width="34" height="34" />
+        <span class="wordmark">Scam<span>ouflage</span></span>
+      </a>
+      <nav aria-label="Main">
+        <a href="/">Home</a>
+        <a class="btn small light" href="/#install">Get the extension</a>
+      </nav>
+    </header>
+
+    <main class="doc">
+      <h1>Privacy policy</h1>
+      <p class="muted">Last updated November 25, 2026. Applies to the Scamouflage Chrome extension and the web demo at scamouflage.xyz.</p>
+
+      <p><b>In short:</b> Scamouflage checks messages on your own computer whenever it can. When it needs help from the cloud, it removes your personal details first. It has no ads, no tracking and no analytics, and it never sells or shares your data.</p>
+
+      <h2>What Scamouflage reads</h2>
+      <ul>
+        <li><b>The email you open in Gmail.</b> The extension can read Gmail pages (<code>mail.google.com</code>) only. When you open an email, it reads that email’s sender, subject, text and links to check it. It doesn’t read the rest of your mailbox. In the inbox list it only adds labels to emails it has already checked.</li>
+        <li><b>Anything you paste or drop in.</b> Text you paste and screenshots you add in the side panel.</li>
+      </ul>
+
+      <h2>Where the check happens</h2>
+      <ul>
+        <li><b>On your computer first.</b> If your Chrome has its built-in AI model (Gemini Nano) ready, the check runs entirely on your computer and the message isn’t sent anywhere.</li>
+        <li><b>Automatic checks never use the cloud.</b> Checks that run by themselves when you open an email stay on your computer.</li>
+        <li><b>Cloud help, with personal details removed.</b> If you start a check and your computer can’t run it (or it’s too slow to start), Scamouflage sends a copy to Google’s Gemini AI through Google Firebase. Before sending, it removes email addresses, phone numbers, card and bank account numbers, Social Security numbers, codes, street addresses, names in greetings and tracking parts of links. The <b>“What should I do?”</b> chat works the same way.</li>
+        <li><b>Screenshots</b> can’t have personal details removed. They’re checked on your computer, and only sent to the cloud if your computer can’t check them and cloud help is turned on.</li>
+        <li><b>You can turn cloud help off</b> in Settings. Scamouflage then works on your computer only.</li>
+      </ul>
+      <p>Cloud requests are handled by Google under the <a href="https://ai.google.dev/gemini-api/terms">Gemini API terms</a>. Scamouflage uses the free tier, under which Google may use submitted content to improve its services. That is why personal details are removed before anything is sent.</p>
+
+      <h2>What is stored</h2>
+      <ul>
+        <li><b>On your computer:</b> your settings, and the results of recent checks for the current browser session (they’re cleared when you close Chrome). The web demo stores the same things in your browser.</li>
+        <li><b>Family sharing (only if you use it):</b> Scamouflage signs you in anonymously with Firebase Authentication, without your email or password. A family code stores its members’ anonymous IDs and the first names they chose. When you tap “Tell my family”, it stores a short summary: the verdict, a one-line reason, the warning signs, the subject with personal details removed, the sender’s domain and your first name. <b>The message itself is never stored.</b> Only members of that family code can read its summaries. Deleting a family code deletes it and all its summaries. Leaving removes you from it.</li>
+        <li><b>Service checks:</b> Firebase App Check and Remote Config confirm requests come from Scamouflage and deliver settings like which AI model to use. They use an app installation ID, not your identity.</li>
+      </ul>
+
+      <h2>What we never do</h2>
+      <ul>
+        <li>Sell, rent or share your data, or use it for advertising.</li>
+        <li>Use your data for anything other than checking messages for scams and family sharing.</li>
+        <li>Use your data to decide creditworthiness or for lending.</li>
+        <li>Track the websites you visit. The extension only runs on Gmail.</li>
+      </ul>
+
+      <h2>Your choices</h2>
+      <ul>
+        <li>Turn off cloud help, automatic checks or inbox labels in Settings.</li>
+        <li>Delete your family code or leave a family at any time from the Family tab.</li>
+        <li>Remove the extension to delete everything it stored on your computer.</li>
+      </ul>
+
+      <h2>Children</h2>
+      <p>Scamouflage isn’t directed at children under 13.</p>
+
+      <h2>Changes and contact</h2>
+      <p>If this policy changes, the date at the top changes too. Questions? <a href="https://github.com/vlww/Scamouflage/issues">Open an issue on GitHub</a>. The source code is public, so you can check all of this yourself.</p>
+    </main>
+
+    <footer class="site-foot">
+      <span>Scamouflage · Built for #BuildHybridAI 2026</span>
+      <span><a href="/privacy">Privacy</a> · <a href="https://github.com/vlww/Scamouflage">Source on GitHub</a> · Apache-2.0</span>
+    </footer>
+  </body>
+</html>

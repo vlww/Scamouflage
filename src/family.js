@@ -119,7 +119,12 @@ async function leaveCircle(code) {
   const list = await getCircles();
   const mine = list.find((c) => c.code === code);
   try {
-    if (mine?.role === 'owner') await deleteDoc(doc(db, 'circles', code));
+    if (mine?.role === 'owner') {
+      // Delete the shared warnings first: deleting a document doesn't delete its subcollection.
+      const reports = await getDocs(collection(db, 'circles', code, 'reports'));
+      await Promise.all(reports.docs.map((d) => deleteDoc(d.ref)));
+      await deleteDoc(doc(db, 'circles', code));
+    }
     else await updateDoc(doc(db, 'circles', code), { members: arrayRemove(u.uid) });
   } catch {
     /* already gone */

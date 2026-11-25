@@ -1,0 +1,94 @@
+<!doctype html>
+<!-- Chrome Web Store images. Rendered by store/render.sh (headless Chrome) into store/out/.
+     ?s=1..4  1280×800 screenshots · ?tile=small 440×280 · ?tile=marquee 1400×560
+     All brands shown are invented (contest + store rule: no third-party logos). -->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../src/styles.css" />
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body { background: #11140d; color: #f6f1dc; font-family: var(--font); }
+  .stage { position: relative; width: 100vw; height: 100vh; overflow: hidden; display: grid; align-items: center; }
+  .camo {
+    position: absolute; inset: 0;
+    background-color: var(--olive-700);
+    background-image:
+      radial-gradient(ellipse 36% 28% at 14% 34%, var(--olive-900) 58%, transparent 61%),
+      radial-gradient(ellipse 28% 24% at 64% 18%, var(--olive-600) 58%, transparent 61%),
+      radial-gradient(ellipse 30% 30% at 88% 78%, var(--olive-800) 58%, transparent 61%),
+      radial-gradient(ellipse 30% 18% at 42% 84%, #5d5434 58%, transparent 61%),
+      radial-gradient(ellipse 16% 14% at 55% 52%, var(--olive-900) 58%, transparent 61%);
+    background-size: 380px 240px;
+  }
+  .camo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, rgb(14 18 9 / 0.93) 0%, rgb(14 18 9 / 0.86) 45%, rgb(14 18 9 / 0.55) 100%); }
+  .shot { position: relative; display: grid; grid-template-columns: 470px 1fr; gap: 48px; padding: 0 64px; align-items: center; height: 100%; }
+  .brandline { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .brandline img { width: 44px; height: 44px; }
+  .brandline .wordmark { font-size: 30px; }
+  h1 { font-family: 'Russo One', var(--font); font-weight: 400; font-size: 50px; line-height: 1.08; margin: 0 0 20px; letter-spacing: 0.005em; }
+  p.sub { font-size: 23px; line-height: 1.45; color: #d9d2b8; margin: 0 0 26px; }
+  ul.pts { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; font-size: 20px; color: #ece5cb; }
+  ul.pts li { display: flex; gap: 12px; align-items: center; }
+  ul.pts li::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: #b5c98a; flex: none; }
+  .art { position: relative; height: 100%; display: grid; place-items: center; }
+  .frame { border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px rgb(0 0 0 / 0.55), 0 0 0 1.5px rgb(255 255 255 / 0.08); background: #fff; }
+  .frame img { display: block; }
+  .panel img { width: 380px; }
+  .panel { max-height: 680px; }
+  .panel img { height: auto; }
+  .wide img { width: 640px; }
+  .crop { width: 660px; }
+  .crop img { width: 1100px; max-width: none; }
+  .stack { position: relative; width: 660px; height: 640px; }
+  .stack .a { position: absolute; left: 0; top: 40px; }
+  .stack .b { position: absolute; right: 0; bottom: 0; }
+  /* Tiles */
+  .tile { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; }
+  .tile .inner { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .tile img { width: 76px; height: 76px; }
+  .tile .wordmark { font-size: 46px; }
+  .tile .tag { font-size: 21px; color: #e6dcbc; font-weight: 600; }
+  .marquee .inner { flex-direction: row; gap: 56px; text-align: left; }
+  .marquee img.logo { width: 150px; height: 150px; }
+  .marquee .wordmark { font-size: 84px; }
+  .marquee .tag { font-size: 32px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="stage"><div class="camo"></div><div id="root" style="position:relative;height:100%"></div></div>
+<script>
+const q = new URLSearchParams(location.search);
+const S = '../docs/screenshots/';
+const brand = `<div class="brandline"><img src="../public/icons/icon128.png" alt=""><span class="wordmark">Scam<span>ouflage</span></span></div>`;
+const copy = (h, sub, pts) => `<div>${brand}<h1>${h}</h1><p class="sub">${sub}</p><ul class="pts">${pts.map((p) => `<li>${p}</li>`).join('')}</ul></div>`;
+const SHOTS = {
+  1: copy('Know a scam when you see it.', 'One clear verdict, one reason in plain words, and one thing to do next.',
+    ['Checked on your own computer', 'Tap a warning sign to see the proof', 'Help if you already clicked or paid']) +
+    `<div class="art"><div class="frame panel"><img src="${S}scam-light.png" alt=""></div></div>`,
+  2: copy('A shield right in your email.', 'Open an email in Gmail and Scamouflage checks it for you, usually in under a second.',
+    ['Scam, Be careful or Looks safe', 'Automatic checks stay on your computer', 'Spots links that pretend to be your bank']) +
+    `<div class="art"><div class="frame wide"><img src="${S}gmail-badge.png" alt=""></div></div>`,
+  3: copy('See which emails are safe at a glance.', 'Emails you’ve opened and checked get a label in your inbox list.',
+    ['Only fully checked emails are labelled', 'Real mail gets a calm green shield', 'Nothing is ever labelled from a guess']) +
+    `<div class="art"><div class="frame crop"><img src="${S}inbox.png" alt=""></div></div>`,
+  4: copy('Private by default.', 'Built-in Chrome AI checks messages on your computer. Cloud help only gets a copy with personal details removed.',
+    ['Paste a text or drop a screenshot too', 'Tell family about a scam in one tap', 'Large text and dark mode']) +
+    `<div class="art"><div class="frame panel"><img src="${S}safe-dark.png" alt=""></div></div>`,
+};
+const root = document.getElementById('root');
+const tile = q.get('tile');
+// Small tile: lay out at its real size and scale 2× (headless Chrome's minimum width is 500px).
+if (q.get('zoom')) {
+  const st = document.querySelector('.stage');
+  Object.assign(st.style, { width: '440px', height: '280px', transform: `scale(${q.get('zoom')})`, transformOrigin: '0 0' });
+}
+if (tile) {
+  root.innerHTML = `<div class="tile ${tile}"><div class="inner"><img class="logo" src="../public/icons/icon128.png" alt="">
+    <div><div class="wordmark">Scam<span>ouflage</span></div><div class="tag">Spot scams before they spot you.</div></div></div></div>`;
+} else {
+  root.innerHTML = `<div class="shot">${SHOTS[q.get('s') || 1]}</div>`;
+}
+</script>
+</body>
+</html>

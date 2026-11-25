@@ -24,6 +24,7 @@ export default defineConfig({
       input: {
         index: resolve(import.meta.dirname, 'index.html'),
         app: resolve(import.meta.dirname, 'sidepanel.html'),
+        privacy: resolve(import.meta.dirname, 'privacy.html'),
       },
     },
   },
