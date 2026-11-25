@@ -1,14 +1,18 @@
 // User settings, persisted in chrome.storage.local (shared by the panel and the background worker).
+import { IS_WEB } from './env.js';
+
+// Demo mode (sample messages) is on for the web demo and for the judging build (npm run zip:judge).
+const DEMO_DEFAULT = IS_WEB || import.meta.env.VITE_DEMO_DEFAULT === '1';
 
 export const DEFAULT_SETTINGS = {
-  onboarded: false,
+  onboarded: IS_WEB, // the web demo skips onboarding: visitors want to try it right away
   autoScan: true, // check Gmail emails as they're opened (on-device only)
   inboxBadges: true, // show full-check verdicts next to already-opened emails in the inbox list
   cloudHelp: true, // allow redacted cloud requests; off = privacy-max, on-device only
   autoSecondOpinion: false, // automatically ask the cloud when on-device is unsure
   textSize: 1, // index into TEXT_SIZES
   theme: 'auto', // 'auto' | 'light' | 'dark'
-  demoMode: false, // show built-in sample messages
+  demoMode: DEMO_DEFAULT, // show built-in sample messages
   myName: '', // your first name, shown to family on shared warnings
 };
 

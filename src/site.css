@@ -1,0 +1,87 @@
+/* Landing page for the web demo. Reuses the extension's design tokens (styles.css). */
+@import './styles.css';
+
+body { background: var(--bg); }
+main { padding: 0; }
+a { color: var(--brand); }
+.site-head {
+  position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px clamp(16px, 4vw, 40px); color: #f6f1dc;
+  background-color: var(--olive-800);
+  background-image:
+    radial-gradient(ellipse 36% 60% at 14% 34%, var(--olive-900) 58%, transparent 61%),
+    radial-gradient(ellipse 28% 50% at 64% 18%, var(--olive-700) 58%, transparent 61%),
+    radial-gradient(ellipse 30% 70% at 88% 78%, var(--olive-950) 58%, transparent 61%);
+  background-size: 420px 120px;
+}
+.site-head::before { content: ''; position: absolute; inset: 0; background: rgb(14 18 9 / 0.55); pointer-events: none; }
+.site-head > * { position: relative; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.site-head nav { display: flex; align-items: center; gap: clamp(10px, 2vw, 24px); }
+.site-head nav a:not(.btn) { color: #f6f1dc; text-decoration: none; font-weight: 600; }
+.site-head nav a:not(.btn):hover { text-decoration: underline; }
+.btn.light { background: #f6f1dc; color: var(--olive-900); }
+.btn.light:hover { background: #fff; }
+
+.landing {
+  display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: clamp(24px, 5vw, 64px); align-items: center;
+  max-width: 1160px; margin: 0 auto; padding: clamp(32px, 6vw, 72px) clamp(16px, 4vw, 40px);
+}
+.eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; font-size: 0.85rem; color: var(--text-muted); }
+.landing h1 { font-family: 'Russo One', var(--font); font-weight: 400; font-size: clamp(2.2rem, 5vw, 3.6rem); line-height: 1.05; letter-spacing: -0.01em; margin: 10px 0 16px; color: var(--text); }
+.landing .lead { font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--text-muted); max-width: 36ch; }
+.landing .lead b { color: var(--text); }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0 20px; }
+.cta .btn { min-height: 50px; padding: 0 22px; font-size: 1.05rem; }
+.cta .btn.light { border-color: var(--border-strong); }
+.ticks { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--text); font-weight: 600; }
+.ticks li { display: flex; align-items: center; gap: 6px; }
+.ticks svg { color: var(--brand); }
+
+.device { border-radius: 22px; background: var(--surface); border: 1.5px solid var(--border); box-shadow: 0 24px 60px rgb(20 25 12 / 0.18), 0 4px 14px rgb(20 25 12 / 0.1); overflow: hidden; scroll-margin-top: 90px; }
+.device-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted); }
+.device-bar span { width: 10px; height: 10px; border-radius: 50%; background: var(--border-strong); opacity: 0.6; }
+.device-bar b { margin-left: auto; font-weight: 700; }
+.device iframe { display: block; width: 100%; height: 680px; border: 0; background: var(--bg); }
+.device-note { padding: 10px 14px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; max-width: 1160px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px) 24px; }
+.stat { display: flex; flex-direction: column; gap: 6px; padding: 20px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); }
+.stat .num { font-family: 'Russo One', var(--font); font-size: 2rem; color: var(--scam-ink); }
+.stat .what { color: var(--text); }
+.stat a { font-size: 0.85rem; color: var(--text-muted); }
+
+.features, .how, .privacy, .install { max-width: 1160px; margin: 0 auto; padding: clamp(32px, 5vw, 56px) clamp(16px, 4vw, 40px); }
+.features h2, .how h2, .privacy h2, .install h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 800; letter-spacing: -0.01em; margin-bottom: 20px; }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.grid article { padding: 20px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); }
+.grid h3 { font-size: 1.1rem; margin: 12px 0 6px; }
+.grid p { color: var(--text-muted); }
+.f-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--device-bg); color: var(--device-ink); }
+.f-icon svg.lucide { width: 22px; height: 22px; }
+
+.flow { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; counter-reset: s; }
+.flow li { position: relative; padding: 20px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); }
+.flow h3 { font-size: 1.1rem; margin: 10px 0 6px; }
+.flow p { color: var(--text-muted); }
+.step { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--brand); color: var(--on-brand); font-weight: 800; }
+.built { margin-top: 18px; color: var(--text-muted); }
+
+.privacy ul { list-style: none; padding: 0; margin: 0 0 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.privacy li { padding: 16px 18px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); }
+
+.install ol { padding-left: 1.3em; margin: 0 0 20px; display: flex; flex-direction: column; gap: 8px; font-size: 1.05rem; }
+.install code { background: var(--surface-2); padding: 1px 6px; border-radius: 6px; }
+
+.site-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; max-width: 1160px; margin: 0 auto; padding: 24px clamp(16px, 4vw, 40px) 40px; color: var(--text-muted); border-top: 1px solid var(--border); font-size: 0.9rem; }
+
+@media (max-width: 960px) {
+  .landing { grid-template-columns: 1fr; }
+  .device { max-width: 460px; width: 100%; justify-self: center; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .site-head nav a:not(.btn) { display: none; }
+  .stats, .grid, .flow, .privacy ul { grid-template-columns: 1fr; }
+  .device iframe { height: 620px; }
+}

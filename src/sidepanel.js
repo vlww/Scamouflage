@@ -1,3 +1,4 @@
+import './web/boot.js'; // must stay first
 import { hydrateIcons, icon, FLAG_ICONS } from './icons.js';
 import { getSettings, saveSettings, TEXT_SIZES } from './settings.js';
 import { initConfig, cfg } from './config.js';
@@ -8,6 +9,7 @@ import { reconVerdict } from './core/recon.js';
 import { emailKey } from './core/key.js';
 import { DEMO_SAMPLES, toEmail } from './samples.js';
 import { showVerdict, getCached, setCached } from './badge.js';
+import { IS_WEB } from './env.js';
 
 const $ = (id) => document.getElementById(id);
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -101,11 +103,16 @@ for (const btn of document.querySelectorAll('.topnav [data-view]')) {
 
 /* ---------- Segmented tabs (with arrow-key support) ---------- */
 
+// The web demo has no Gmail: only Paste and Screenshot.
 const TABS = [
   ['gmail', 'tabGmail', 'paneGmail'],
   ['paste', 'tabPaste', 'panePaste'],
   ['image', 'tabImage', 'paneImage'],
-];
+].filter(([m]) => !(IS_WEB && m === 'gmail'));
+if (IS_WEB) {
+  $('tabGmail').remove();
+  $('paneGmail').hidden = true;
+}
 function setMode(mode, { focus = false } = {}) {
   if (state.mode !== mode) clearResult();
   state.mode = mode;
@@ -909,7 +916,7 @@ const TOGGLES = [
   ['cloudHelp', 'Cloud help', 'When this computer can’t check, or you ask questions. Personal details are hidden first.'],
   ['inboxBadges', 'Label my inbox', 'Shows the result next to emails you’ve already opened.'],
   ['autoSecondOpinion', 'Automatic second opinion', 'If an on-device check is unsure, ask the cloud too.'],
-];
+].filter(([key]) => !(IS_WEB && ['autoScan', 'inboxBadges'].includes(key))); // Gmail-only
 
 async function setSetting(key, value) {
   state.settings = await saveSettings({ [key]: value });
@@ -933,7 +940,7 @@ function renderSettings() {
   $('displayGroup').replaceChildren(textSizeRow(), themeRow(), toggleRow('demoMode', 'Demo mode', 'Show sample messages to try Scamouflage without real email.'));
   renderModelStatus();
   renderFamilyStatus();
-  $('aboutLine').textContent = `Scamouflage ${chrome.runtime.getManifest().version} · Firebase AI Logic hybrid inference`;
+  $('aboutLine').textContent = `Scamouflage ${chrome.runtime.getManifest().version}${IS_WEB ? ' web demo' : ''} · Firebase AI Logic hybrid inference`;
 }
 
 function toggleRow(key, title, sub) {
@@ -1119,7 +1126,7 @@ addEventListener('online', () => {
   } else {
     showView('check');
   }
-  setMode('gmail');
+  setMode(IS_WEB ? 'paste' : 'gmail');
   // Load Nano into memory now (no gesture needed once downloaded) so the first check is fast.
   warmUp();
   if (!navigator.onLine) notice('You’re offline. Private on-device checks still work.', 'offline');

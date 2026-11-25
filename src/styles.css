@@ -243,7 +243,7 @@ main { padding: var(--sp-4) var(--sp-3) var(--sp-6); outline: none; }
 :root[data-theme='dark'] .btn.secondary { background: var(--surface-2); color: var(--text); }
 
 /* ---------- Segmented control ---------- */
-.segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; background: var(--surface-2); border-radius: var(--radius); }
+.segmented { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; padding: 3px; background: var(--surface-2); border-radius: var(--radius); }
 .segmented button {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   min-height: 38px; border: 0; border-radius: 9px; background: transparent; color: var(--text-muted);

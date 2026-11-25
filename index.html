@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Scamouflage: spot scams before they spot you</title>
+    <meta name="description" content="Scamouflage checks emails, texts and screenshots for scams, privately on your own computer with Chrome's built-in AI. Plain words, one clear next step." />
+    <meta property="og:title" content="Scamouflage: spot scams before they spot you" />
+    <meta property="og:description" content="A private scam checker for Gmail, texts and screenshots. On-device first, with Firebase AI Logic hybrid inference." />
+    <meta property="og:image" content="/icons/icon128.png" />
+    <link rel="icon" href="/icons/icon32.png" />
+    <link rel="stylesheet" href="./src/site.css" />
+  </head>
+  <body>
+    <a class="skip" href="#try">Skip to the live demo</a>
+
+    <header class="site-head">
+      <a class="brand" href="/" aria-label="Scamouflage home">
+        <img src="/icons/icon48.png" alt="" width="34" height="34" />
+        <span class="wordmark">Scam<span>ouflage</span></span>
+      </a>
+      <nav aria-label="Main">
+        <a href="#how">How it works</a>
+        <a href="#privacy">Privacy</a>
+        <a class="btn small light" href="#install">Get the extension</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="landing">
+        <div class="landing-copy">
+          <p class="eyebrow">For Gmail, texts and screenshots</p>
+          <h1>Spot scams before they spot you.</h1>
+          <p class="lead">Scamouflage tells you in plain words whether a message is a scam and what to do next. It checks privately <b>on your own computer</b> with Chrome’s built-in AI, and only asks the cloud for help when it has to, with your personal details hidden first.</p>
+          <div class="cta">
+            <a class="btn primary" href="#try">Try it now</a>
+            <a class="btn light" href="https://github.com/vlww/Scamouflage/releases/latest">Get the Chrome extension</a>
+          </div>
+          <ul class="ticks">
+            <li><span data-icon="Lock"></span>On-device first</li>
+            <li><span data-icon="EyeOff"></span>Personal details hidden</li>
+            <li><span data-icon="Users"></span>Tell family in one tap</li>
+          </ul>
+        </div>
+        <div class="device" id="try">
+          <div class="device-bar" aria-hidden="true"><span></span><span></span><span></span><b>Live demo</b></div>
+          <iframe src="/sidepanel.html" title="Scamouflage live demo: paste a message or drop a screenshot to check it" loading="eager"></iframe>
+          <p class="device-note">This is the real extension panel. Paste a message, tap a sample, or drop a screenshot.</p>
+        </div>
+      </section>
+
+      <section class="stats" aria-labelledby="statsTitle">
+        <h2 id="statsTitle" class="sr-only">Why it matters</h2>
+        <div class="stat">
+          <span class="num">$7.7B</span>
+          <span class="what">reported lost to online fraud by Americans 60+ in 2025, up 59% in a year</span>
+          <a href="https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf">FBI IC3 2025 report</a>
+        </div>
+        <div class="stat">
+          <span class="num">191,561</span>
+          <span class="what">phishing and spoofing complaints in 2025, the most-reported crime type</span>
+          <a href="https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf">FBI IC3 2025 report</a>
+        </div>
+        <div class="stat">
+          <span class="num">$15.9B</span>
+          <span class="what">in fraud losses reported to the FTC in 2025, from 3 million reports</span>
+          <a href="https://www.ftc.gov/news-events/news/press-releases/2026/03/ftc-testifies-joint-economic-committee-agencys-efforts-combat-fraud">FTC, March 2026</a>
+        </div>
+      </section>
+
+      <section class="features" aria-labelledby="featTitle">
+        <h2 id="featTitle">Made for the people scammers target most</h2>
+        <div class="grid">
+          <article>
+            <span class="f-icon" data-icon="ShieldCheck"></span>
+            <h3>Right in your inbox</h3>
+            <p>A small shield appears next to the email you open: <em>Scam</em>, <em>Be careful</em> or <em>Looks safe</em>. Usually in under a second.</p>
+          </article>
+          <article>
+            <span class="f-icon" data-icon="MessageCircle"></span>
+            <h3>Plain words, one next step</h3>
+            <p>No jargon. One reason, one thing to do. Tap a warning sign to see the proof, like a link that <em>says</em> your bank but goes somewhere else.</p>
+          </article>
+          <article>
+            <span class="f-icon" data-icon="KeyRound"></span>
+            <h3>“I already clicked”</h3>
+            <p>The Debrief gives calm, step-by-step recovery help if you already clicked, paid or shared a password.</p>
+          </article>
+          <article>
+            <span class="f-icon" data-icon="Users"></span>
+            <h3>Family in the loop</h3>
+            <p>Share a warning with someone you trust. Only a short summary is shared, never the message itself.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="how" id="how" aria-labelledby="howTitle">
+        <h2 id="howTitle">How it works</h2>
+        <ol class="flow">
+          <li>
+            <span class="step">1</span>
+            <h3>Quick check</h3>
+            <p>Built-in rules spot look-alike links, fake senders, gift-card and urgency tricks in about a millisecond.</p>
+          </li>
+          <li>
+            <span class="step">2</span>
+            <h3>On-device AI</h3>
+            <p>Gemini Nano, built into Chrome, reads the message on your computer and streams back a verdict. The message never leaves.</p>
+          </li>
+          <li>
+            <span class="step">3</span>
+            <h3>Cloud only when needed</h3>
+            <p>If your computer can’t run it, names, emails, phone and account numbers are removed <em>first</em>. Then Gemini in the cloud helps. You always see which one ran.</p>
+          </li>
+        </ol>
+        <p class="built">Built with <b>Firebase AI Logic</b> hybrid inference, App Check, Remote Config, Authentication and Cloud Firestore.</p>
+      </section>
+
+      <section class="privacy" id="privacy" aria-labelledby="privTitle">
+        <h2 id="privTitle">Privacy, plainly</h2>
+        <ul>
+          <li><b>On-device by default.</b> When your computer can run Gemini Nano, your messages are checked there and never sent anywhere.</li>
+          <li><b>Hidden before anything is sent.</b> Cloud help only gets a copy with personal details removed: emails, phone, card and account numbers, addresses, names in greetings.</li>
+          <li><b>You’re in control.</b> Turn cloud help off and Scamouflage works on-device only. Automatic checks never use the cloud.</li>
+          <li><b>Nothing sold, no ads.</b> Results are kept only for your browser session. Family sharing stores a short summary, never the message.</li>
+        </ul>
+        <p class="muted">In this web demo, anything you paste stays in your browser unless cloud help is needed, and then only the redacted copy is sent.</p>
+      </section>
+
+      <section class="install" id="install" aria-labelledby="instTitle">
+        <h2 id="instTitle">Get the Chrome extension</h2>
+        <ol>
+          <li><a href="https://github.com/vlww/Scamouflage/releases/latest/download/scamouflage.zip">Download scamouflage.zip</a> and unzip it.</li>
+          <li>Open <code>chrome://extensions</code> and turn on <b>Developer mode</b>.</li>
+          <li>Click <b>Load unpacked</b> and choose the unzipped folder.</li>
+          <li>Open Gmail, click the Scamouflage icon, and follow the 3-step setup.</li>
+        </ol>
+        <a class="btn primary" href="https://github.com/vlww/Scamouflage/releases/latest">See the latest release</a>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      <span>Scamouflage · Built for #BuildHybridAI 2026</span>
+      <span><a href="https://github.com/vlww/Scamouflage">Source on GitHub</a> · Apache-2.0</span>
+    </footer>
+
+    <script type="module" src="./src/site.js"></script>
+  </body>
+</html>

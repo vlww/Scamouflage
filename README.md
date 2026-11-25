@@ -6,13 +6,16 @@ Scamouflage is a Chrome extension that checks the email you have open in Gmail, 
 
 Built for **#BuildHybridAI 2026** (Web/Chrome track) with **Firebase AI Logic hybrid inference**.
 
+**▶ Try it in your browser: [scamouflage-37a72.web.app](https://scamouflage-37a72.web.app)** (live demo: paste a message or drop a screenshot) · **⬇ [Download the extension](https://github.com/vlww/Scamouflage/releases/latest)**
+
 <p align="center">
   <img src="docs/screenshots/scam-light.png" width="280" alt="Side panel: Scam verdict, one-line reason, one action, warning signs">
   <img src="docs/screenshots/safe-dark.png" width="280" alt="Side panel in dark mode: Looks safe">
 </p>
 <p align="center">
   <img src="docs/screenshots/gmail-badge.png" width="580" alt="The Scamouflage shield badge next to an email subject, with the disguised link highlighted">
-  <br><sub>Real on-device results on invented sample emails. The badge is shown on an unbranded mail mock (<code>scripts/mail-mock.html</code>) that uses Gmail's DOM structure.</sub>
+  <img src="docs/screenshots/inbox.png" width="580" alt="Inbox list where opened emails keep their Scam / Looks safe shield">
+  <br><sub>Panel results are real Gemini Nano outputs on invented sample emails. The badge and inbox labels are shown on unbranded mocks (<code>scripts/mail-mock.html</code>, <code>scripts/inbox-mock.html</code>) that use Gmail's DOM structure.</sub>
 </p>
 
 ---
@@ -124,7 +127,8 @@ Timings are logged in development builds (`npm run dev`) as `[Scamouflage] ⏱ s
 | Product | Used for |
 |---|---|
 | **Firebase AI Logic** (Gemini Developer API) | Hybrid on-device/cloud scan, structured JSON output both ways, streaming, multimodal screenshot check, Debrief chat |
-| **App Check** | Protects the AI Logic endpoint. reCAPTCHA can't run on `chrome-extension://` pages, so the extension uses an App Check **debug token**, which the hackathon rules allow. |
+| **App Check** | Protects the AI Logic endpoint. reCAPTCHA can't run on `chrome-extension://` pages, so the extension uses an App Check **debug token**, which the hackathon rules allow. The web demo uses **reCAPTCHA v3** instead, and its build is checked to never contain the debug token (`scripts/check-web-build.mjs`). |
+| **Hosting** | The live web demo and landing page (`npm run deploy:web`). |
 | **Remote Config** | `cloud_model`, `max_body_chars`, `max_links`, `escalation_threshold`, `ondevice_timeout_ms`, `hedge_ms`, `prompt_version`, `feature_image_check`, `feature_auto_scan`, `feature_family`: tune speed/accuracy and switch features without republishing. Cached values apply instantly; new ones are fetched in the background. |
 | **Authentication** | Anonymous sign-in via `firebase/auth/web-extension` (MV3 can't load remote code) for family sharing |
 | **Cloud Firestore** (Lite SDK) | Family circles and shared redacted reports, with tight security rules |
@@ -160,6 +164,8 @@ Requirements: Chrome desktop 139+, Node 20+.
 3. `chrome://extensions` → **Developer mode** → **Load unpacked** → choose `dist/`.
 4. Open Gmail (reload Gmail tabs that were already open), click the Scamouflage icon, and open an email. The first run walks you through a 3-step setup, including downloading the on-device model.
 
+Web demo: `npm run build:web` (→ `dist-web/`, checked for secrets) · `npm run deploy:web`. Judge build of the extension with Demo mode on: `npm run zip:judge`.
+
 Other scripts: `npm test` (Vitest, 76 tests, including the on-device/cloud race) · `npm run lint` · `npm run contrast` (WCAG check) · `npm run eval` · `npm run zip` (builds `scamouflage.zip`).
 
 ### Using your own Firebase project
@@ -174,10 +180,14 @@ Other scripts: `npm test` (Vitest, 76 tests, including the on-device/cloud race)
 
 ## Testing for judges
 
-1. Download `scamouflage.zip` from the Devpost submission and unzip it. It includes a working App Check debug token.
+**Quickest:** open the live demo at **[scamouflage-37a72.web.app](https://scamouflage-37a72.web.app)**. It's the same panel running in a web page, with Paste and Screenshot; tap a sample and press **Check for scams**. On a Chrome that exposes Gemini Nano to web pages it runs on-device, otherwise it uses redacted cloud help.
+
+**The full extension (Gmail badge, inbox labels):**
+
+1. Download `scamouflage.zip` from the [latest release](https://github.com/vlww/Scamouflage/releases/latest) and unzip it. It includes a working App Check debug token, and Demo mode is on so the sample messages are ready.
 2. `chrome://extensions` → **Developer mode** → **Load unpacked** → select the unzipped folder.
 3. For on-device inference, click **Set up on this computer** during onboarding (or in **Settings**) to download Gemini Nano. For on-device screenshot checks also enable `chrome://flags/#prompt-api-multimodal-input` and restart. If your machine can't run Nano, everything still works through the redacted cloud path, and the route chip shows **☁️ Cloud**.
-4. **No Gmail needed:** open **Settings** → turn on **Demo mode**, then **Paste** → tap a sample (*Delivery fee*, *Bank lock*, *Boss gift cards*, *Tech support*, *Grandkid in trouble*, *Store receipt*) → **Check for scams**.
+4. **No Gmail needed:** **Paste** → tap a sample (*Delivery fee*, *Bank lock*, *Boss gift cards*, *Tech support*, *Grandkid in trouble*, *Store receipt*) → **Check for scams**.
 5. Try **What if I already clicked?**, tap a warning sign to see its evidence, tap the route chip, and drop a screenshot into **Screenshot**.
 6. To see the hybrid fallback: set `chrome://flags/#optimization-guide-on-device-model` to **Disabled**, restart, and check again. The route chip switches from **🔒 On-device** to **☁️ Cloud · N hidden**. The other way round: with Nano on, turn off Wi-Fi and checks keep working on-device.
 

@@ -23,6 +23,27 @@
     async set(obj) { Object.assign(mem[name], obj); if (name === 'local') localStorage.setItem('shim.local', JSON.stringify(mem.local)); },
     async remove(keys) { for (const k of [].concat(keys)) delete mem[name][k]; },
   });
+  // ?seed=1: replay real Gemini Nano outputs recorded earlier for the Gmail samples (README screenshots).
+  if (q.get('seed')) {
+    const key = (e) => {
+      const str = `${e.fromEmail || ''}|${e.subject || ''}|${(e.body || '').slice(0, 4000)}`;
+      let h = 0x811c9dc5;
+      for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+      return (h >>> 0).toString(36);
+    };
+    const RECORDED = {
+      'delivery-fee': { verdict: 'scam', confidence: 95, why: 'This email asks for money and uses a suspicious website.', flags: [
+        { type: 'impersonation', text: 'ParcelPost Delivery impersonates a real company' },
+        { type: 'lookalike_domain', text: 'Website address is not the official ParcelPost site' },
+        { type: 'payment_request', text: 'Requests payment via suspicious link' }] },
+      receipt: { verdict: 'safe', confidence: 95, why: 'This email seems legitimate from a known company.', flags: [] },
+    };
+    window.__seed = async () => {
+      const { SAMPLES, toEmail } = await import(window.__samplesUrl);
+      const s = SAMPLES.find((x) => x.id === gmailId);
+      if (s && RECORDED[s.id]) mem.session['r:' + key({ ...toEmail(s), source: 'gmail' })] = { result: RECORDED[s.id], source: 'on_device', redactedCount: 0, recon: [], timings: { verdict: 770, total: 2700 }, at: Date.now() };
+    };
+  }
   const listeners = [];
   const gmailId = q.get('gmail');
   window.__shim = { listeners, mem };
@@ -31,6 +52,11 @@
     const wide = [...document.querySelectorAll('body *')].filter((el) => el.getBoundingClientRect().right > innerWidth + 1 && el.offsetParent !== null).slice(0, 8).map((el) => `${el.tagName}.${el.className}#${el.id}:${Math.round(el.getBoundingClientRect().right)}`);
     document.title = `vw=${innerWidth} sw=${document.documentElement.scrollWidth} ${wide.join(' | ')}`;
   }, 800));
+  if (q.get('still') || q.get('seed')) {
+    const st = document.createElement('style');
+    st.textContent = '*,*::before,*::after{animation:none!important;transition:none!important}';
+    document.documentElement.append(st);
+  }
   if (q.get('w')) {
     const st = document.createElement('style');
     st.textContent = `html{max-width:${+q.get('w')}px;margin:0 auto;box-shadow:0 0 0 1px #8885;min-height:100vh}`;
@@ -45,7 +71,7 @@
     },
     storage: { local: area('local'), session: area('session') },
     tabs: {
-      query: async () => [{ id: 1, url: gmailId ? 'https://mail.google.com/mail/u/0/' : 'https://example.com/' }],
+      query: async () => { await window.__seed?.(); return [{ id: 1, url: gmailId ? 'https://mail.google.com/mail/u/0/' : 'https://example.com/' }]; },
       sendMessage: async (_id, msg) => {
         if (msg.type !== 'SCAMO_GET_EMAIL') return undefined;
         const { SAMPLES, toEmail } = await import(window.__samplesUrl);
