@@ -1,0 +1,137 @@
+:root {
+  --olive-900: #1d2316;
+  --olive-800: #2a3320;
+  --olive-700: #3b4a2b;
+  --olive-600: #4b5d34;
+  --olive-400: #7a8a55;
+  --khaki: #c9bd8f;
+  --sand: #f1e9c8;
+  --paper: #f7f3e3;
+  --ink: #1f2418;
+  --safe: #3f7d3a;
+  --warn: #c98a14;
+  --danger: #b3261e;
+  --radius: 10px;
+  --stencil: 'Impact', 'Haettenschweiler', 'Arial Narrow Bold', sans-serif;
+  font-size: 15px;
+}
+body.big-text { font-size: 19px; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+/* Woodland camo, drawn with layered radial gradients (no image assets). */
+.camo, .masthead {
+  background-color: var(--olive-600);
+  background-image:
+    radial-gradient(ellipse 38% 26% at 18% 30%, var(--olive-900) 60%, transparent 62%),
+    radial-gradient(ellipse 30% 22% at 70% 22%, var(--olive-400) 60%, transparent 62%),
+    radial-gradient(ellipse 26% 30% at 85% 75%, var(--olive-800) 60%, transparent 62%),
+    radial-gradient(ellipse 34% 20% at 40% 80%, #8c8058 60%, transparent 62%),
+    radial-gradient(ellipse 18% 14% at 55% 50%, var(--olive-900) 60%, transparent 62%);
+  background-size: 180px 120px;
+}
+
+.masthead {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 14px;
+  color: var(--sand);
+  border-bottom: 4px solid var(--olive-900);
+}
+.masthead h1 {
+  margin: 0; font-family: var(--stencil); font-weight: 400;
+  font-size: 1.9rem; letter-spacing: 2px; text-transform: uppercase;
+  text-shadow: 2px 2px 0 var(--olive-900);
+}
+.tagline { margin: 0; font-size: .85rem; color: var(--sand); text-shadow: 1px 1px 0 var(--olive-900); }
+.logo { width: 42px; height: 42px; }
+.icon-btn {
+  margin-left: auto; background: var(--olive-900); color: var(--sand);
+  border: 1px solid var(--khaki); border-radius: 6px; padding: 4px 8px; font-weight: 700; cursor: pointer;
+}
+
+.device-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 8px 14px; background: var(--olive-800); color: var(--sand); font-size: .85rem;
+}
+.device-bar progress { flex: 1; accent-color: var(--khaki); }
+
+main { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+
+.tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--olive-700); }
+.tab {
+  flex: 1; padding: 8px; border: 0; cursor: pointer; font-weight: 600;
+  background: transparent; color: var(--olive-700); border-radius: 8px 8px 0 0;
+}
+.tab.active { background: var(--olive-700); color: var(--sand); }
+
+.pane { display: flex; flex-direction: column; gap: 8px; }
+.pane input, .pane textarea, .chat-form input {
+  width: 100%; padding: 8px 10px; border: 2px solid var(--olive-400); border-radius: 8px;
+  background: #fff; font: inherit; color: var(--ink);
+}
+.pane textarea { resize: vertical; }
+.muted { color: #5d6450; margin: 0; }
+.email-card { background: #fff; border: 2px dashed var(--olive-400); border-radius: var(--radius); padding: 10px; }
+.email-card b { display: block; }
+
+.btn {
+  font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px;
+  padding: 9px 14px; border: 2px solid var(--olive-900);
+  background: var(--khaki); color: var(--olive-900);
+}
+.btn:hover { filter: brightness(1.05); }
+.btn:disabled { opacity: .6; cursor: wait; }
+.btn.small { padding: 5px 10px; font-size: .85rem; }
+.btn.primary {
+  background: var(--olive-700); color: var(--sand);
+  font-family: var(--stencil); font-weight: 400; letter-spacing: 1.5px; text-transform: uppercase;
+}
+.btn.big { font-size: 1.3rem; padding: 14px; box-shadow: 0 4px 0 var(--olive-900); }
+.btn.big:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--olive-900); }
+.link-btn { align-self: flex-start; background: none; border: 0; color: var(--olive-700); text-decoration: underline; cursor: pointer; padding: 0; font: inherit; }
+
+.result { background: #fff; border-radius: var(--radius); border: 2px solid var(--olive-700); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.result h2, .debrief h2 { font-family: var(--stencil); font-weight: 400; letter-spacing: 1px; text-transform: uppercase; margin: 6px 0 0; font-size: 1.1rem; color: var(--olive-700); }
+
+.verdict { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; color: #fff; }
+.verdict.safe { background: var(--safe); }
+.verdict.suspicious { background: var(--warn); }
+.verdict.scam { background: var(--danger); }
+.verdict-icon { font-size: 2.2rem; line-height: 1; }
+.verdict-label { font-family: var(--stencil); font-size: 1.7rem; letter-spacing: 1.5px; text-transform: uppercase; }
+.verdict-sub { font-size: .9rem; opacity: .95; }
+
+.meter { height: 8px; background: #e4dfc8; border-radius: 4px; overflow: hidden; }
+.meter div { height: 100%; width: 0; background: var(--olive-700); transition: width .5s; }
+
+.badge { align-self: flex-start; font-size: .8rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--olive-800); color: var(--sand); }
+.badge.cloud { background: #2f4a6b; }
+
+.summary { font-size: 1.05rem; margin: 0; }
+.advice { margin: 0; font-weight: 600; }
+.flags { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.flags li { background: var(--paper); border-left: 4px solid var(--warn); padding: 6px 8px; border-radius: 4px; }
+.flags li.recon { border-left-color: var(--olive-400); }
+.flags .tag { display: inline-block; font-size: .72rem; font-weight: 700; text-transform: uppercase; color: var(--olive-700); margin-right: 4px; }
+.fineprint { font-size: .78rem; color: #5d6450; margin: 0; }
+
+.debrief { display: flex; flex-direction: column; gap: 8px; }
+.chat-log { display: flex; flex-direction: column; gap: 8px; }
+.msg { padding: 8px 10px; border-radius: 10px; white-space: pre-wrap; }
+.msg.bot { background: #fff; border: 1px solid var(--olive-400); }
+.msg.user { background: var(--olive-700); color: var(--sand); align-self: flex-end; max-width: 85%; }
+.chat-form { display: flex; gap: 6px; }
+
+.error { background: #fbe4e2; color: var(--danger); border-radius: 8px; padding: 8px 10px; margin: 0; }
+
+.spinner { display: inline-block; width: 1em; height: 1em; border: 3px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -2px; }
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scamouflage</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <img src="/icons/icon48.png" alt="" class="logo" />
+      <div>
+        <h1>Scamouflage</h1>
+        <p class="tagline">Scams hide. We spot them.</p>
+      </div>
+      <button id="bigTextBtn" class="icon-btn" title="Toggle large text" aria-pressed="false">Aa</button>
+    </header>
+
+    <section id="deviceBar" class="device-bar" aria-live="polite">
+      <span id="deviceStatus">Checking on-device model…</span>
+      <button id="deployBtn" class="btn small" hidden>Deploy on-device model</button>
+      <progress id="deployProgress" max="100" value="0" hidden></progress>
+    </section>
+
+    <main>
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tabGmail" class="tab active" aria-selected="true">Open email</button>
+        <button role="tab" id="tabPaste" class="tab" aria-selected="false">Paste text</button>
+      </div>
+
+      <section id="gmailPane" class="pane">
+        <p id="emailPreview" class="muted">Open an email in Gmail, then press Scan.</p>
+      </section>
+
+      <section id="pastePane" class="pane" hidden>
+        <input id="pasteFrom" placeholder="From (e.g. PayPal &lt;support@paypa1-help.com&gt;)" />
+        <input id="pasteSubject" placeholder="Subject" />
+        <textarea id="pasteBody" rows="7" placeholder="Paste the email or message text here…"></textarea>
+        <button id="sampleBtn" class="link-btn">Load a sample scam</button>
+      </section>
+
+      <button id="scanBtn" class="btn primary big">Scan for scams</button>
+
+      <section id="result" class="result" hidden aria-live="polite">
+        <div id="verdictBanner" class="verdict">
+          <span id="verdictIcon" class="verdict-icon"></span>
+          <div>
+            <div id="verdictLabel" class="verdict-label"></div>
+            <div id="verdictSub" class="verdict-sub"></div>
+          </div>
+        </div>
+        <div class="meter" aria-hidden="true"><div id="meterFill"></div></div>
+        <span id="sourceBadge" class="badge"></span>
+        <p id="summary" class="summary"></p>
+        <h2>Intel</h2>
+        <ul id="flags" class="flags"></ul>
+        <h2>Orders</h2>
+        <p id="advice" class="advice"></p>
+        <button id="debriefBtn" class="btn">Request cloud debrief</button>
+        <p class="fineprint" id="debriefNote">
+          The debrief runs in the cloud. Names, emails, phone and account numbers are redacted first.
+        </p>
+      </section>
+
+      <section id="debrief" class="debrief" hidden>
+        <h2>Debrief <span class="badge cloud">☁️ Cloud</span></h2>
+        <div id="chatLog" class="chat-log"></div>
+        <form id="chatForm" class="chat-form">
+          <input id="chatInput" placeholder="Ask a follow-up, e.g. “What if I already clicked?”" autocomplete="off" />
+          <button class="btn small" type="submit">Send</button>
+        </form>
+      </section>
+
+      <p id="error" class="error" hidden role="alert"></p>
+    </main>
+
+    <script type="module" src="./src/sidepanel.js"></script>
+  </body>
+</html>

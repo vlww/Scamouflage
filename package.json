@@ -1,0 +1,19 @@
+{
+  "name": "scamouflage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome extension that spots scam and phishing emails on-device with Gemini Nano, with a privacy-preserving cloud debrief via Firebase AI Logic hybrid inference.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "vite build",
+    "zip": "npm run build && cd dist && zip -r ../scamouflage.zip ."
+  },
+  "dependencies": {
+    "firebase": "^13.4.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.8"
+  }
+}
