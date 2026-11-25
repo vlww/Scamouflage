@@ -887,7 +887,16 @@ $('chatForm').addEventListener('submit', (e) => {
 
 let familyMod;
 async function family() {
-  familyMod ??= await import('./family.js');
+  try {
+    familyMod ??= await import('./family.js');
+  } catch (e) {
+    // A page loaded before an update asks for code files that no longer exist.
+    if (IS_WEB && !sessionStorage.getItem('scamo.reloaded')) {
+      sessionStorage.setItem('scamo.reloaded', '1');
+      location.reload();
+    }
+    throw e;
+  }
   return familyMod;
 }
 
@@ -904,7 +913,16 @@ async function renderFamily() {
     body.replaceChildren(h('p', { class: 'muted', text: 'Family sharing is turned off right now.' }));
     return;
   }
-  const f = await family();
+  let f;
+  try {
+    f = await family();
+  } catch {
+    body.replaceChildren(
+      h('p', { class: 'notice error', text: 'Family couldn’t load. Scamouflage may have just been updated.' }),
+      h('button', { class: 'btn secondary', type: 'button', text: IS_WEB ? 'Reload the page' : 'Try again', onclick: () => (IS_WEB ? location.reload() : renderFamily()) })
+    );
+    return;
+  }
   f.renderFamilyView(body, { settings: state.settings, toast, notice, joinCode: state.joinCode });
   state.joinCode = null; // prefill once
 }
