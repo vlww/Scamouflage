@@ -56,7 +56,43 @@
       fromEmail: p.senderEl?.getAttribute('email') || '',
       body: (p.bodyEl.innerText || '').trim().slice(0, 20000),
       links,
+      threadIds: threadIdsOf(p.subjectEl),
     };
+  }
+
+  /** Gmail thread IDs on an element (legacy hex id and/or "thread-f:<n>"), normalised. */
+  function threadIdsOf(el) {
+    if (!el) return [];
+    const ids = [el.getAttribute('data-legacy-thread-id'), el.getAttribute('data-thread-perm-id'), el.getAttribute('data-thread-id')]
+      .filter(Boolean)
+      .map((id) => id.replace(/^#?thread-[a-z]:/i, ''));
+    return [...new Set(ids)];
+  }
+
+  /* ---------------- Inbox rows ---------------- */
+
+  const ROW_SEL = ['tr.zA', '[role="main"] tr[role="row"]'];
+  function inboxRows() {
+    let rows = [];
+    for (const sel of ROW_SEL) {
+      rows = [...document.querySelectorAll(sel)].filter(visible);
+      if (rows.length) break;
+    }
+    return rows.slice(0, 50).map((tr) => {
+      const subjEl = tr.querySelector('span.bog') || tr.querySelector('[data-thread-id] span, .y6 span');
+      const idEl = tr.querySelector('[data-legacy-thread-id]') || tr.querySelector('[data-thread-id]');
+      const senderEl = tr.querySelector('span.zF[email], span.yP[email]') || tr.querySelector('[email]');
+      const snippet = (tr.querySelector('span.y2')?.innerText || '').replace(/^\s*[-–]\s*/, '').trim().slice(0, 300);
+      const row = {
+        subject: (subjEl?.innerText || '').trim().slice(0, 200),
+        fromName: senderEl?.getAttribute('name') || senderEl?.innerText.trim() || '',
+        fromEmail: senderEl?.getAttribute('email') || '',
+        snippet,
+        threadIds: threadIdsOf(idEl),
+      };
+      row.rowKey = emailKey({ fromEmail: row.fromEmail, subject: row.subject, body: snippet });
+      return { el: tr, anchor: subjEl, row };
+    }).filter((r) => r.anchor && (r.row.subject || r.row.snippet));
   }
 
   // Same as src/core/key.js (FNV-1a over sender|subject|body).
@@ -215,6 +251,69 @@
     setTimeout(() => target.setAttribute('style', prev), 6000);
   }
 
+  /* ---------------- Inbox row badges ---------------- */
+
+  const ROW_CSS = `
+    :host { all: initial; display: inline-flex; vertical-align: middle; margin-right: 6px; }
+    span.pill { box-sizing: border-box; display: inline-flex; align-items: center; gap: 3px; height: 20px; padding: 0 7px 0 4px;
+      border-radius: 999px; font: 600 12px/1 'Google Sans', Roboto, system-ui, sans-serif; color: var(--fg); background: var(--bg); border: 1px solid var(--bd); }
+    span.icon-only { padding: 0 2px; background: transparent; border-color: transparent; }
+    svg { width: 15px; height: 15px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .camo { fill: var(--sh); stroke: var(--sh); stroke-width: 1.5; }
+    .glyph { stroke: #fff; stroke-width: 2.8; }
+  `;
+  const ROW_LOOK = {
+    scam: { label: 'Scam', fg: '#a3211a', bg: '#fbeae7', bd: '#e8b4ae', sh: '#a3211a' },
+    suspicious: { label: 'Careful', fg: '#6b4500', bg: '#fff3d1', bd: '#e9cf86', sh: '#8a5a00' },
+    safe: { label: '', fg: '#1d5b1c', bg: 'transparent', bd: 'transparent', sh: '#2b6a29' },
+  };
+  const rowStates = new Map(); // rowKey -> { rank, state }
+  let rowsSent = '';
+  let inboxEnabled = true;
+  chrome.storage?.local.get('settings').then(({ settings }) => {
+    inboxEnabled = settings?.inboxBadges !== false;
+  }).catch(() => {});
+  chrome.storage?.onChanged.addListener((changes) => {
+    if (!changes.settings) return;
+    inboxEnabled = changes.settings.newValue?.inboxBadges !== false;
+    if (!inboxEnabled) document.querySelectorAll('.scamouflage-row').forEach((n) => n.remove());
+    rowsSent = '';
+  });
+
+  function renderRow(entry, st) {
+    let hostEl = entry.el.querySelector(':scope .scamouflage-row');
+    if (!st || !inboxEnabled) {
+      hostEl?.remove();
+      return;
+    }
+    const look = ROW_LOOK[st.verdict];
+    if (!look) return;
+    const sig = `${st.verdict}|${st.full ? 1 : 0}`;
+    if (hostEl && hostEl.dataset.sig === sig && hostEl.nextElementSibling === entry.anchor) return;
+    hostEl?.remove();
+    hostEl = document.createElement('span');
+    hostEl.className = 'scamouflage-row';
+    hostEl.dataset.sig = sig;
+    const root = hostEl.attachShadow({ mode: 'closed' });
+    const word = { scam: 'Scam', suspicious: 'Be careful', safe: 'Looks safe' }[st.verdict];
+    const how = st.full ? 'Checked by Scamouflage.' : st.phase === 'recon' ? 'Quick check found warning signs. Open for a full check.' : 'Quick look from the preview. Open the email for a full check.';
+    const glyph = { scam: 'm9.5 9.5 5 5m0-5-5 5', suspicious: 'M12 8v4m0 3.5v.01', safe: 'm9 12 2 2 4-4' }[st.verdict];
+    root.innerHTML = `<style>${ROW_CSS}</style><span class="pill${look.label ? '' : ' icon-only'}" role="img" aria-label="Scamouflage: ${word}. ${how}" title="Scamouflage: ${word}. ${how}"
+      style="--fg:${look.fg};--bg:${look.bg};--bd:${look.bd};--sh:${look.sh}"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="camo" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path class="glyph" d="${glyph}"/></svg>${look.label}</span>`;
+    entry.anchor.parentElement.insertBefore(hostEl, entry.anchor);
+  }
+
+  function syncInbox() {
+    if (!inboxEnabled) return;
+    const entries = inboxRows();
+    for (const e of entries) renderRow(e, rowStates.get(e.row.rowKey)?.state);
+    const sig = entries.map((e) => e.row.rowKey).join(',');
+    if (sig && sig !== rowsSent) {
+      rowsSent = sig;
+      chrome.runtime.sendMessage({ type: 'SCAMO_INBOX', rows: entries.map((e) => e.row) }).catch(() => {});
+    }
+  }
+
   /* ---------------- Messaging ---------------- */
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -228,6 +327,16 @@
       renderBadge();
     } else if (message?.type === 'SCAMO_HIGHLIGHT') {
       highlight(message.evidence);
+    } else if (message?.type === 'SCAMO_RESYNC') {
+      rowsSent = '';
+      if (!lastKey) syncInbox();
+    } else if (message?.type === 'SCAMO_ROW_BADGES') {
+      for (const it of message.items || []) {
+        const prev = rowStates.get(it.rowKey);
+        if (prev && prev.rank > it.rank) continue;
+        rowStates.set(it.rowKey, { rank: it.rank, state: it.state });
+      }
+      for (const e of inboxRows()) renderRow(e, rowStates.get(e.row.rowKey)?.state);
     }
   });
 
@@ -250,6 +359,8 @@
     } else if (current.state && !(host && host.isConnected)) {
       renderBadge(); // Gmail re-rendered the header; put the badge back.
     }
+    if (!email) syncInbox();
+    else rowsSent = ''; // re-announce the list when the user goes back to it
   }
 
   // Debounced: wait for Gmail to settle, but never more than ~1s after the first change.

@@ -6,6 +6,12 @@
    ========================================================================== */
 
 
+@font-face {
+  font-family: 'Russo One';
+  src: url('../node_modules/@fontsource/russo-one/files/russo-one-latin-400-normal.woff2') format('woff2');
+  font-display: swap;
+}
+
 :root {
   /* Palette: olive / khaki / sand */
   --olive-950: #12160d;
@@ -190,8 +196,8 @@ svg.lucide { width: 1.15em; height: 1.15em; flex: none; stroke-width: 2.1; verti
 .masthead > * { position: relative; }
 .brand { display: flex; align-items: center; gap: var(--sp-2); min-width: 0; }
 .logo { width: 34px; height: 34px; filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.4)); }
-.wordmark { font-family: var(--font); font-size: 23px; font-weight: 800; line-height: 1; letter-spacing: -0.02em; color: #f6f1dc; white-space: nowrap; text-shadow: 0 1px 2px rgb(0 0 0 / 0.45); }
-.wordmark span { color: #e6dcbc; font-weight: 700; }
+.wordmark { font-family: 'Russo One', var(--font); font-size: 23px; font-weight: 400; line-height: 1; letter-spacing: 0.01em; color: #f6f1dc; white-space: nowrap; text-shadow: 0 1px 2px rgb(0 0 0 / 0.45); }
+.wordmark span { color: #e6dcbc; }
 .topnav { display: flex; gap: 2px; }
 .icon-btn {
   display: inline-grid; place-items: center; width: 36px; height: 36px; padding: 0;

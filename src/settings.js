@@ -3,6 +3,7 @@
 export const DEFAULT_SETTINGS = {
   onboarded: false,
   autoScan: true, // check Gmail emails as they're opened (on-device only)
+  inboxBadges: true, // label inbox rows (cache + quick on-device looks while the panel is open)
   cloudHelp: true, // allow redacted cloud requests; off = privacy-max, on-device only
   autoSecondOpinion: false, // automatically ask the cloud when on-device is unsure
   textSize: 1, // index into TEXT_SIZES

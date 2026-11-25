@@ -175,6 +175,7 @@ async function refreshGmail({ email: pushed, key: pushedKey, tabId: pushedTab } 
   }
   if (!email) {
     setGmail(null, null, tab.id, { title: 'Open an email in Gmail', sub: 'We’ll check it automatically.' });
+    chrome.tabs.sendMessage(tab.id, { type: 'SCAMO_RESYNC' }).catch(() => {}); // label the inbox list
     return;
   }
   key ||= emailKey(email);
@@ -201,7 +202,57 @@ function setGmail(email, key, tabId, fallback) {
   updateScanButton();
 }
 
+/** Full-check results are also stored by Gmail thread ID so the inbox row shows them. */
+function saveThreadResult(email, entry) {
+  for (const id of email?.threadIds || []) setCached(`t:${id}`, { result: entry.result, source: entry.source });
+}
+
+/* ---------- Inbox quick looks (on-device only, lowest priority) ---------- */
+
+const inboxQueue = { tabId: null, rows: [], running: false };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function queueInbox(tabId, rows) {
+  if (!state.settings?.autoScan || !state.settings.inboxBadges || !cfg('feature_auto_scan')) return;
+  if ((await deviceAvailability()) !== 'available') return;
+  const todo = [];
+  for (const row of rows.slice(0, 30)) {
+    let done = await getCached(`q:${row.rowKey}`);
+    for (const id of row.threadIds || []) done ||= await getCached(`t:${id}`);
+    if (!done) todo.push(row);
+  }
+  // The latest list replaces whatever was queued (e.g. the user changed folders).
+  Object.assign(inboxQueue, { tabId, rows: todo });
+  if (!inboxQueue.running) drainInbox();
+}
+
+async function drainInbox() {
+  inboxQueue.running = true;
+  try {
+    while (inboxQueue.rows.length) {
+      // Always yield to a check the user can see.
+      while (state.current?.pending) await sleep(400);
+      const row = inboxQueue.rows.shift();
+      const tabId = inboxQueue.tabId;
+      try {
+        const out = await scanEmail(
+          { source: 'inbox', fromName: row.fromName, fromEmail: row.fromEmail, subject: row.subject, body: row.snippet, links: [] },
+          { allowCloud: false }
+        );
+        if (!out.result) continue;
+        await setCached(`q:${row.rowKey}`, { result: out.result, source: out.source });
+        chrome.tabs.sendMessage(tabId, { type: 'SCAMO_ROW_BADGES', items: [{ rowKey: row.rowKey, rank: 2, state: { phase: 'done', verdict: out.result.verdict, full: false } }] }).catch(() => {});
+      } catch {
+        // Skip this row; the model may be busy or unavailable.
+      }
+    }
+  } finally {
+    inboxQueue.running = false;
+  }
+}
+
 chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg?.type === 'SCAMO_INBOX' && sender.tab) queueInbox(sender.tab.id, msg.rows || []);
   if (msg?.type === 'SCAMO_EMAIL_OPENED' && sender.tab) {
     activeTab().then((tab) => {
       if (tab?.id === sender.tab.id) refreshGmail({ email: msg.email, key: msg.key, tabId: sender.tab.id });
@@ -444,6 +495,7 @@ async function runScan({ auto }) {
     renderFinal();
     const entry = { result: out.result, source: out.source, redactedCount: out.redactedCount, recon: out.recon, timings: out.timings, note: out.note };
     if (key) setCached(key, entry);
+    saveThreadResult(email, entry);
     if (tabId != null) showVerdict(tabId, key, 3, { phase: 'done', verdict: out.result.verdict, source: out.source });
 
     const unsure = out.result.verdict === 'suspicious' || out.result.confidence < cfg('escalation_threshold');
@@ -735,7 +787,9 @@ async function runSecondOpinion() {
     Object.assign(cur, { result: out.result, source: out.source, redactedCount: out.redactedCount, second: first, note: null });
     renderFinal();
     toast(out.result.verdict === first.verdict ? 'Second opinion agrees.' : 'Second opinion updated the result.');
-    if (cur.key) setCached(cur.key, { result: out.result, source: out.source, redactedCount: out.redactedCount, recon: cur.recon, timings: cur.timings });
+    const entry2 = { result: out.result, source: out.source, redactedCount: out.redactedCount, recon: cur.recon, timings: cur.timings };
+    if (cur.key) setCached(cur.key, entry2);
+    saveThreadResult(cur.email, entry2);
     if (cur.tabId != null) showVerdict(cur.tabId, cur.key, 3, { phase: 'done', verdict: out.result.verdict, source: out.source });
   } catch (e) {
     notice(friendlyError(e), 'error');
@@ -897,6 +951,7 @@ async function renderFamily() {
 const TOGGLES = [
   ['autoScan', 'Check emails as I open them', 'Private: automatic checks only run on this computer.'],
   ['cloudHelp', 'Cloud help', 'When this computer can’t check, or you ask questions. Personal details are hidden first.'],
+  ['inboxBadges', 'Label my inbox', 'Shows a shield next to emails in your inbox. Quick looks run privately on this computer.'],
   ['autoSecondOpinion', 'Automatic second opinion', 'If an on-device check is unsure, ask the cloud too.'],
 ];
 

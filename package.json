@@ -16,6 +16,7 @@
     "preview": "npm run build -- --mode development && python3 scripts/preview-server.py 5180"
   },
   "dependencies": {
+    "@fontsource/russo-one": "^5.3.0",
     "firebase": "^13.4.0",
     "lucide": "^1.79.0"
   },

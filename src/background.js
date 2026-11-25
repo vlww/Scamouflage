@@ -31,8 +31,38 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
     })();
     return;
   }
+  if (msg?.type === 'SCAMO_INBOX' && tabId != null) {
+    labelInbox(tabId, msg.rows || []);
+    return;
+  }
   if (msg?.type === 'SCAMO_EMAIL_CLOSED' && tabId != null) {
     chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {});
     chrome.action.setTitle({ tabId, title: 'Open Scamouflage' }).catch(() => {});
   }
 });
+
+/**
+ * Inbox rows: answer from the cache (a full check of that thread, or an earlier quick look),
+ * otherwise from local recon on sender + subject + preview. Recon only labels rows with real
+ * warning signs; the side panel (if open) adds on-device quick looks for the rest.
+ */
+async function labelInbox(tabId, rows) {
+  const items = [];
+  for (const row of rows) {
+    let hit = null;
+    for (const id of row.threadIds || []) hit ||= await getCached(`t:${id}`);
+    if (hit) {
+      items.push({ rowKey: row.rowKey, rank: 3, state: { phase: 'done', verdict: hit.result.verdict, full: true } });
+      continue;
+    }
+    const quick = await getCached(`q:${row.rowKey}`);
+    if (quick) {
+      items.push({ rowKey: row.rowKey, rank: 2, state: { phase: 'done', verdict: quick.result.verdict, full: false } });
+      continue;
+    }
+    const recon = runRecon({ fromName: row.fromName, fromEmail: row.fromEmail, subject: row.subject, body: row.snippet, links: [] });
+    const { verdict } = reconVerdict(recon);
+    if (verdict !== 'safe') items.push({ rowKey: row.rowKey, rank: 1, state: { phase: 'recon', verdict } });
+  }
+  if (items.length) chrome.tabs.sendMessage(tabId, { type: 'SCAMO_ROW_BADGES', items }).catch(() => {});
+}

@@ -1,0 +1,39 @@
+<!doctype html>
+<!-- DEV ONLY: unbranded inbox list using Gmail's row class names, to exercise inbox badges in
+     public/content.js. Served by scripts/preview-server.py at /__inbox -->
+<html lang="en"><head><meta charset="utf-8"><title>Inbox (mock)</title>
+<style>
+  body { margin: 0; font: 14px/1.4 system-ui, sans-serif; color: #1f1f1f; background: #f6f8fc; }
+  .wrap { margin: 16px; background: #fff; border-radius: 16px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  tr.zA { height: 40px; border-bottom: 1px solid #eee; }
+  tr.zA td { padding: 0 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  td.yX { width: 180px; font-weight: 600; }
+  .xT { display: flex; align-items: center; overflow: hidden; }
+  .y6 { display: inline-flex; align-items: center; }
+  span.bog { font-weight: 600; }
+  span.y2 { color: #5e5e5e; margin-left: 6px; overflow: hidden; text-overflow: ellipsis; }
+</style></head>
+<body><div class="wrap"><table><tbody id="rows"></tbody></table></div>
+<script>
+  const ROWS = [
+    ['ParcelPost Delivery', 'notice@parcelpost-redelivery.top', 'FINAL NOTICE: Your package is on hold', 'We attempted to deliver your package but could not complete delivery because of an unpaid customs fee', 'scam', 3],
+    ['Copperleaf Outfitters', 'orders@copperleafoutfitters.com', 'Your order #CL-48213 has shipped', 'Thanks for shopping with Copperleaf Outfitters! Your order has shipped and should arrive Tuesday', 'safe', 3],
+    ['Account Team', 'no-reply@acct-notify-center.com', 'New sign-in to your account', 'We noticed a new sign-in to your account from a Windows device', 'suspicious', 2],
+    ['Sam Rivera', 'sam.rivera.home@gmail.com', "Sunday dinner at Mom's", "Hi Mom, just confirming Sunday dinner at 5. I'll bring the lasagna", 'safe', 2],
+    ['Linda Ortiz', 'linda.ortiz.ceo.office@gmail.com', 'Quick favor', "Hi, are you at your desk? I'm in a board meeting and need you to pick up gift cards", 'scam', 2],
+    ['Maple Grove Garden Club', 'news@maplegrovegardens.org', 'Spring meeting + seed swap this Thursday', 'Our spring meeting is this Thursday at 6:30 PM at the library', 'safe', 2],
+  ];
+  document.getElementById('rows').innerHTML = ROWS.map(([n, e, s, p], i) => `<tr class="zA"><td class="yX"><span class="zF" name="${n}" email="${e}">${n}</span></td>
+    <td class="xY a4W"><div class="xS"><div class="xT"><div class="y6"><span class="bog" data-legacy-thread-id="t${i}">${s}</span></div><span class="y2"> - ${p}</span></div></div></td></tr>`).join('');
+  const listeners = [];
+  window.chrome = { runtime: { id: 'mock', onMessage: { addListener: (f) => listeners.push(f) },
+    sendMessage: async (msg) => {
+      if (msg.type !== 'SCAMO_INBOX') return;
+      // Replay what the extension would answer (verdicts are fixed for this mock).
+      const items = msg.rows.map((r, i) => ({ rowKey: r.rowKey, rank: ROWS[i][5], state: { phase: 'done', verdict: ROWS[i][4], full: ROWS[i][5] === 3 } }));
+      setTimeout(() => listeners.forEach((f) => f({ type: 'SCAMO_ROW_BADGES', items }, {}, () => {})), 50);
+    } } };
+</script>
+<script src="/content.js"></script>
+</body></html>
