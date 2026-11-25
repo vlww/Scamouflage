@@ -6,7 +6,7 @@ Scamouflage is a Chrome extension that checks the email you have open in Gmail, 
 
 Built for **#BuildHybridAI 2026** (Web/Chrome track) with **Firebase AI Logic hybrid inference**.
 
-**▶ Try it in your browser: [scamouflage-37a72.web.app](https://scamouflage-37a72.web.app)** (live demo: paste a message or drop a screenshot) · **⬇ [Download the extension](https://github.com/vlww/Scamouflage/releases/latest)**
+**🧩 [Add to Chrome from the Chrome Web Store](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm)** · **▶ [Try it in your browser](https://scamouflage-37a72.web.app)** (live demo: paste a message or drop a screenshot)
 
 <p align="center">
   <img src="docs/screenshots/scam-light.png" width="280" alt="Side panel: Scam verdict, one-line reason, one action, warning signs">
@@ -184,10 +184,10 @@ Other scripts: `npm test` (Vitest, 76 tests, including the on-device/cloud race)
 
 **The full extension (Gmail badge, inbox labels):**
 
-1. Download `scamouflage.zip` from the [latest release](https://github.com/vlww/Scamouflage/releases/latest) and unzip it. It includes a working App Check debug token, and Demo mode is on so the sample messages are ready.
-2. `chrome://extensions` → **Developer mode** → **Load unpacked** → select the unzipped folder.
+1. Install it from the **[Chrome Web Store](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm)** (one click, no developer mode). To use the built-in sample messages, open **Settings** → turn on **Demo mode**.
+2. *Or load it manually:* download `scamouflage.zip` from the [latest release](https://github.com/vlww/Scamouflage/releases/latest), unzip it, then `chrome://extensions` → **Developer mode** → **Load unpacked** → select the folder. This build has Demo mode on already.
 3. For on-device inference, click **Set up on this computer** during onboarding (or in **Settings**) to download Gemini Nano. For on-device screenshot checks also enable `chrome://flags/#prompt-api-multimodal-input` and restart. If your machine can't run Nano, everything still works through the redacted cloud path, and the route chip shows **☁️ Cloud**.
-4. **No Gmail needed:** **Paste** → tap a sample (*Delivery fee*, *Bank lock*, *Boss gift cards*, *Tech support*, *Grandkid in trouble*, *Store receipt*) → **Check for scams**.
+4. **No Gmail needed:** **Paste** → tap a sample (with Demo mode on) (*Delivery fee*, *Bank lock*, *Boss gift cards*, *Tech support*, *Grandkid in trouble*, *Store receipt*) → **Check for scams**.
 5. Try **What if I already clicked?**, tap a warning sign to see its evidence, tap the route chip, and drop a screenshot into **Screenshot**.
 6. To see the hybrid fallback: set `chrome://flags/#optimization-guide-on-device-model` to **Disabled**, restart, and check again. The route chip switches from **🔒 On-device** to **☁️ Cloud · N hidden**. The other way round: with Nano on, turn off Wi-Fi and checks keep working on-device.
 

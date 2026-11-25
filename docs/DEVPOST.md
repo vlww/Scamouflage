@@ -1,5 +1,7 @@
 # Scamouflage: Devpost draft
 
+**Links:** [Chrome Web Store](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm) · [Live demo](https://scamouflage-37a72.web.app) · [Source](https://github.com/vlww/Scamouflage)
+
 **Tagline:** Scams hide. We spot them. A private, on-device scam checker for the people scammers target most.
 
 ## Inspiration
