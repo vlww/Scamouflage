@@ -127,7 +127,7 @@ Timings are logged in development builds (`npm run dev`) as `[Scamouflage] ⏱ s
 | Product | Used for |
 |---|---|
 | **Firebase AI Logic** (Gemini Developer API) | Hybrid on-device/cloud scan, structured JSON output both ways, streaming, multimodal screenshot check, Debrief chat |
-| **App Check** | Protects the AI Logic endpoint. reCAPTCHA can't run on `chrome-extension://` pages, so the extension uses an App Check **debug token**, which the hackathon rules allow. The web demo uses **reCAPTCHA v3** instead, and its build is checked to never contain the debug token (`scripts/check-web-build.mjs`). |
+| **App Check** | Protects the AI Logic endpoint. reCAPTCHA can't run on `chrome-extension://` pages, so the extension uses an App Check **debug token**, which the hackathon rules allow. The web demo uses **reCAPTCHA Enterprise** instead, and its build is checked to never contain the debug token (`scripts/check-web-build.mjs`). |
 | **Hosting** | The live web demo and landing page (`npm run deploy:web`). |
 | **Remote Config** | `cloud_model`, `max_body_chars`, `max_links`, `escalation_threshold`, `ondevice_timeout_ms`, `hedge_ms`, `prompt_version`, `feature_image_check`, `feature_auto_scan`, `feature_family`: tune speed/accuracy and switch features without republishing. Cached values apply instantly; new ones are fetched in the background. |
 | **Authentication** | Anonymous sign-in via `firebase/auth/web-extension` (MV3 can't load remote code) for family sharing |

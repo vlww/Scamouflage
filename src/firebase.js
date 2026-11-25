@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { initializeAppCheck, CustomProvider, ReCaptchaV3Provider } from 'firebase/app-check';
+import { initializeAppCheck, CustomProvider, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 import { getAI, GoogleAIBackend } from 'firebase/ai';
 import { firebaseConfig } from './firebase-config.js';
 import { IS_WEB } from './env.js';
@@ -8,13 +8,14 @@ import { IS_WEB } from './env.js';
 //  - Extension: reCAPTCHA can't run on chrome-extension:// pages, so it uses an App Check
 //    *debug token* (accepted for hackathon submissions). It lives in .env.local (gitignored)
 //    and is baked in at build time.
-//  - Web demo: real attestation with reCAPTCHA v3. The debug token is never included in the
+//  - Web demo: real attestation with reCAPTCHA Enterprise (Google Cloud Fraud Defense; classic v3
+//    keys are deprecated). The debug token is never included in the
 //    web build (vite.web.config.js blanks it, and the deploy script checks the output).
 let provider;
 if (IS_WEB) {
-  const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+  const siteKey = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY;
   provider = siteKey
-    ? new ReCaptchaV3Provider(siteKey)
+    ? new ReCaptchaEnterpriseProvider(siteKey)
     : new CustomProvider({ getToken: () => Promise.reject(new Error('App Check: no reCAPTCHA site key configured')) });
 } else {
   const debugToken = import.meta.env.VITE_APPCHECK_DEBUG_TOKEN;
