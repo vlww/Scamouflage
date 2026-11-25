@@ -13,7 +13,8 @@ export const DEFAULTS = {
   max_links: DEFAULT_MAX_LINKS,
   // Below this on-device confidence (or on "suspicious") we offer a cloud second opinion.
   escalation_threshold: 70,
-  ondevice_timeout_ms: 20000,
+  // How long to wait for Gemini Nano to START answering (cold starts can be slow).
+  ondevice_timeout_ms: 60000,
   prompt_version: DEFAULT_PROMPT_VERSION,
   feature_image_check: true,
   feature_auto_scan: true,

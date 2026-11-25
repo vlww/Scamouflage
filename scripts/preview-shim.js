@@ -1,7 +1,7 @@
 // DEV ONLY (not shipped): a tiny chrome.* stand-in so the built side panel can be opened as a
 // normal localhost page for screenshots and on-device timing runs. Query params:
 //   ?gmail=<sample id>  pretend that sample is open in Gmail     ?onboarded=0  show onboarding
-//   ?theme=dark|light    ?big=1  large text
+//   ?theme=dark|light    ?size=0..4 text size    ?demo=1 demo mode (sample chips)
 (() => {
   const q = new URLSearchParams(location.search);
   const mem = { local: {}, session: {} };
@@ -10,7 +10,8 @@
     ...(mem.local.settings || {}),
     onboarded: q.get('onboarded') !== '0',
     ...(q.get('theme') ? { theme: q.get('theme') } : {}),
-    ...(q.get('big') ? { bigText: q.get('big') === '1' } : {}),
+    ...(q.get('size') ? { textSize: +q.get('size') } : {}),
+    ...(q.get('demo') ? { demoMode: q.get('demo') === '1' } : {}),
   };
   const area = (name) => ({
     async get(keys) {
@@ -25,6 +26,11 @@
   const listeners = [];
   const gmailId = q.get('gmail');
   window.__shim = { listeners, mem };
+  if (q.get('view')) addEventListener('load', () => setTimeout(() => document.querySelector(`[data-view="${q.get('view')}"]`)?.click(), 300));
+  if (q.get('measure')) addEventListener('load', () => setTimeout(() => {
+    const wide = [...document.querySelectorAll('body *')].filter((el) => el.getBoundingClientRect().right > innerWidth + 1 && el.offsetParent !== null).slice(0, 8).map((el) => `${el.tagName}.${el.className}#${el.id}:${Math.round(el.getBoundingClientRect().right)}`);
+    document.title = `vw=${innerWidth} sw=${document.documentElement.scrollWidth} ${wide.join(' | ')}`;
+  }, 800));
   if (q.get('w')) {
     const st = document.createElement('style');
     st.textContent = `html{max-width:${+q.get('w')}px;margin:0 auto;box-shadow:0 0 0 1px #8885;min-height:100vh}`;

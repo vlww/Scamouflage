@@ -99,17 +99,31 @@ export function warmUp() {
 /* ---------------- Streaming core ---------------- */
 
 class TimeoutError extends Error {
-  constructor(ms) {
-    super(`On-device check took longer than ${Math.round(ms / 1000)}s`);
+  constructor(stage, ms) {
+    super(`On-device check: no ${stage === 'start' ? 'answer started' : 'progress'} for ${Math.round(ms / 1000)}s`);
     this.name = 'TimeoutError';
+    this.stage = stage;
   }
 }
 
-async function runStream(m, request, { onPartial, t, timeoutMs, signal }) {
+/**
+ * Streams a structured answer. Timeouts are activity-based, not a flat total:
+ *  - firstTokenMs: how long to wait for the model to start (a cold Gemini Nano can take a while
+ *    to load after Chrome starts);
+ *  - idleMs: once it's writing, how long it may go quiet before we call it stalled.
+ * If the verdict already streamed in, a stall keeps the partial answer instead of failing.
+ */
+async function runStream(m, request, { onPartial, t, firstTokenMs = 60000, idleMs = 15000, signal }) {
   let timer;
+  let fail;
   const timeout = new Promise((_, rej) => {
-    timer = setTimeout(() => rej(new TimeoutError(timeoutMs)), timeoutMs);
+    fail = rej;
   });
+  const arm = (stage, ms) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fail(new TimeoutError(stage, ms)), ms);
+  };
+  arm('start', firstTokenMs);
   let text = '';
   let source;
   let hasVerdict = false;
@@ -117,6 +131,7 @@ async function runStream(m, request, { onPartial, t, timeoutMs, signal }) {
     const { stream } = await m.generateContentStream(request, signal ? { signal } : undefined);
     for await (const chunk of stream) {
       t.mark('firstToken');
+      arm('stall', idleMs);
       source ??= chunk.inferenceSource;
       try {
         text += chunk.text();
@@ -156,7 +171,7 @@ async function runStream(m, request, { onPartial, t, timeoutMs, signal }) {
  * 'on_device' | 'in_cloud' | 'recon_only'.
  */
 export async function scanEmail(email, opts = {}) {
-  const { allowCloud = true, onRecon, onPartial, onRoute, signal } = opts;
+  const { allowCloud = true, onRecon, onPartial, onRoute, onRetry, signal } = opts;
   const t = timer();
 
   // 1. Recon on the full email (instant first answer).
@@ -171,7 +186,7 @@ export async function scanEmail(email, opts = {}) {
   const avail = await deviceAvailability('text');
   t.mark('availability');
   const version = cfg('prompt_version');
-  const timeoutMs = cfg('ondevice_timeout_ms');
+  const firstTokenMs = cfg('ondevice_timeout_ms');
   const stats = { inChars: 0, trimmedChars: prepared.trimmedChars, availability: avail };
 
   const finish = (text, source, redactedCount, note) => {
@@ -189,7 +204,7 @@ export async function scanEmail(email, opts = {}) {
     onRoute?.({ source: InferenceSource.IN_CLOUD, redactedCount: count, note });
     // PREFER_ON_DEVICE on purpose: the text is already redacted, so either route is private.
     const m = avail === 'available' ? model('text', InferenceMode.ONLY_IN_CLOUD) : model('text', InferenceMode.PREFER_ON_DEVICE);
-    const { text, source } = await runStream(m, prompt, { onPartial, t, timeoutMs: 30000, signal });
+    const { text, source } = await runStream(m, prompt, { onPartial, t, firstTokenMs: 30000, signal });
     return finish(text, source ?? InferenceSource.IN_CLOUD, count, note);
   };
 
@@ -197,9 +212,19 @@ export async function scanEmail(email, opts = {}) {
     const prompt = scanPrompt(prepared, recon, version);
     stats.inChars = prompt.length;
     onRoute?.({ source: InferenceSource.ON_DEVICE, redactedCount: 0 });
+    const onDevice = () => runStream(model('text', InferenceMode.ONLY_ON_DEVICE), prompt, { onPartial, t, firstTokenMs, signal });
     try {
-      const { text } = await runStream(model('text', InferenceMode.ONLY_ON_DEVICE), prompt, { onPartial, t, timeoutMs, signal });
-      return finish(text, InferenceSource.ON_DEVICE, 0);
+      let out;
+      try {
+        out = await onDevice();
+      } catch (e) {
+        // One quiet retry: a cold start or a stuck session usually clears on the second try.
+        if (e.name !== 'TimeoutError' || signal?.aborted) throw e;
+        console.warn('[Scamouflage] On-device check timed out; retrying once:', e.message);
+        onRetry?.();
+        out = await onDevice();
+      }
+      return finish(out.text, InferenceSource.ON_DEVICE, 0);
     } catch (e) {
       if (signal?.aborted) throw e;
       if (!allowCloud) throw e;
@@ -222,7 +247,7 @@ export async function secondOpinion(email, recon, { onPartial } = {}) {
   const prepared = prepareEmail(email, { maxBody: cfg('max_body_chars') * 2, maxLinks: cfg('max_links') });
   const { email: safe, count } = redactEmail(prepared);
   const prompt = scanPrompt(safe, recon, 'v2-cautious');
-  const { text } = await runStream(model('text', InferenceMode.ONLY_IN_CLOUD), prompt, { onPartial, t, timeoutMs: 30000 });
+  const { text } = await runStream(model('text', InferenceMode.ONLY_IN_CLOUD), prompt, { onPartial, t, firstTokenMs: 30000 });
   t.mark('total');
   logTimings('second opinion (in_cloud)', t.marks);
   return { result: normalizeResult(parseFinalJson(text)), source: InferenceSource.IN_CLOUD, redactedCount: count };
@@ -245,7 +270,7 @@ export async function scanImage(base64, mimeType, opts = {}) {
   onRoute?.({ source: onDevice ? InferenceSource.ON_DEVICE : InferenceSource.IN_CLOUD, redactedCount: 0, image: true });
   const m = model('image', onDevice ? InferenceMode.ONLY_ON_DEVICE : InferenceMode.ONLY_IN_CLOUD);
   const request = [imagePrompt(cfg('prompt_version')), { inlineData: { data: base64, mimeType } }];
-  const { text, source } = await runStream(m, request, { onPartial, t, timeoutMs: onDevice ? 45000 : 30000 });
+  const { text, source } = await runStream(m, request, { onPartial, t, firstTokenMs: onDevice ? 60000 : 30000 });
   t.mark('total');
   logTimings(`image scan (${source})`, t.marks);
   return { result: normalizeResult(parseFinalJson(text)), source: source ?? (onDevice ? 'on_device' : 'in_cloud'), redactedCount: 0, recon: [] };

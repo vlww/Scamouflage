@@ -17,6 +17,7 @@ import {
 import { app } from './firebase.js';
 import { redact } from './core/redact.js';
 import { icon } from './icons.js';
+import { saveSettings } from './settings.js';
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -69,7 +70,7 @@ export function buildReport(cur, authorName) {
     subject: cur.image ? 'A screenshot' : redact(cur.email?.subject || '(no subject)').text.slice(0, 140),
     fromDomain: domain.slice(0, 100),
     source: cur.image ? 'image' : cur.source === 'on_device' ? 'on_device' : 'in_cloud',
-    authorName: (authorName || 'Your family member').slice(0, 40),
+    authorName: (authorName || 'A family member').slice(0, 40),
   };
 }
 
@@ -157,7 +158,7 @@ function friendly(e) {
 
 /* ---------------- UI: share sheet ---------------- */
 
-export async function openShareSheet({ report, settings, toast, notice, goFamily }) {
+export async function openShareSheet({ report, toast, notice, goFamily }) {
   const text = reportText(report);
   const box = document.getElementById('notice');
   const circles = await getCircles();
@@ -184,7 +185,7 @@ export async function openShareSheet({ report, settings, toast, notice, goFamily
         else notice(friendly(e), 'error');
       }
     },
-  }, icon('Share2'), circles.length ? `Send to ${settings.contactName || 'family'}` : 'Set up family sharing');
+  }, icon('Share2'), circles.length ? 'Send to my family' : 'Set up family sharing');
   box.className = 'notice info';
   box.replaceChildren(
     h('span', {}, icon('Users')),
@@ -211,7 +212,14 @@ export async function renderFamilyView(root, { settings, toast }) {
   const parts = [];
 
   if (!circles.length) {
-    const nameInput = h('input', { placeholder: 'Your first name', maxlength: '40', value: settings.contactName ? '' : '' });
+    const nameInput = h('input', { placeholder: 'e.g. Pat', maxlength: '40', autocomplete: 'given-name', id: 'famName' });
+    nameInput.value = settings.myName || '';
+    // Your name is what family members see on warnings you share.
+    const rememberName = async () => {
+      const name = nameInput.value.trim();
+      if (name) Object.assign(settings, await saveSettings({ myName: name }));
+      return name;
+    };
     const codeInput = h('input', { placeholder: 'ABCDE-12345', maxlength: '11', autocomplete: 'off', 'aria-label': 'Family code' });
     const err = h('p', { class: 'notice error', hidden: true, role: 'alert' });
     const run = async (btn, fn) => {
@@ -227,20 +235,20 @@ export async function renderFamilyView(root, { settings, toast }) {
       }
     };
     const createBtn = h('button', { class: 'btn primary', type: 'button', text: 'Create a family code' });
-    createBtn.onclick = () => run(createBtn, () => createCircle(nameInput.value.trim()));
+    createBtn.onclick = () => run(createBtn, async () => createCircle(await rememberName()));
     const joinBtn = h('button', { class: 'btn secondary', type: 'button', text: 'Join' });
-    joinBtn.onclick = () => run(joinBtn, () => joinCircle(codeInput.value, nameInput.value.trim()));
+    joinBtn.onclick = () => run(joinBtn, async () => joinCircle(codeInput.value, await rememberName()));
 
     parts.push(
+      h('label', { class: 'field' }, h('span', { class: 'field-label', text: 'Your first name' }), nameInput, h('span', { class: 'muted', style: 'font-size: var(--fs-sm)', text: 'Family members see this on warnings you share.' })),
       h('div', { class: 'card' },
-        h('h2', { text: 'Protect someone' }),
-        h('p', { class: 'muted', text: 'Create a code and give it to a family member. When you tap “Tell my family”, they’ll see the warning in their Scamouflage.' }),
-        h('label', { class: 'field' }, h('span', { class: 'field-label', text: 'Your name' }), nameInput),
+        h('h2', { text: 'Share my warnings' }),
+        h('p', { class: 'muted', text: 'Create a code and give it to someone you trust. When you tap “Tell my family” on a warning, they’ll see it in their Scamouflage.' }),
         createBtn
       ),
       h('div', { class: 'card' },
-        h('h2', { text: 'Got a code?' }),
-        h('p', { class: 'muted', text: 'Enter the code a family member gave you to see the warnings they share.' }),
+        h('h2', { text: 'Watch over someone' }),
+        h('p', { class: 'muted', text: 'Got a code from a family member? Enter it to see the warnings they share.' }),
         h('div', { class: 'row' }, codeInput, joinBtn)
       ),
       err

@@ -4,7 +4,7 @@
 - Chrome with Scamouflage loaded (from `dist/`), Gemini Nano downloaded (Settings shows "On-device AI: Ready"), side panel open.
 - A test Gmail inbox with two invented emails sent to it from a second account: the **Bank lock** sample (send as HTML so the link text says `www.harborviewbank.com/secure-login` but points elsewhere) and the **Store receipt** sample. Copy them from `src/samples.js`.
 - `docs/demo/sample-text-message.png` on the desktop for the screenshot check.
-- Large-text mode **on** (it reads better on video). Hide bookmarks and other extensions.
+- Settings → **Text size: Large** (it reads better on video). Leave **Demo mode** off so the panel looks like the real product. Hide bookmarks and other extensions.
 - Branding: the samples use invented brands only. Gmail's own UI will be on screen; keep its logo out of frame (crop to the message area) to stay within the contest's no-third-party-logos rule, or record the badge on `scripts/mail-mock.html` instead.
 
 | Time | Screen | Voice-over |

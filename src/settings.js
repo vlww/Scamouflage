@@ -5,15 +5,29 @@ export const DEFAULT_SETTINGS = {
   autoScan: true, // check Gmail emails as they're opened (on-device only)
   cloudHelp: true, // allow redacted cloud requests; off = privacy-max, on-device only
   autoSecondOpinion: false, // automatically ask the cloud when on-device is unsure
-  bigText: false,
+  textSize: 1, // index into TEXT_SIZES
   theme: 'auto', // 'auto' | 'light' | 'dark'
-  contactName: '',
+  demoMode: false, // show built-in sample messages
+  myName: '', // your first name, shown to family on shared warnings
 };
+
+export const TEXT_SIZES = [
+  { label: 'Small', px: 14 },
+  { label: 'Default', px: 15 },
+  { label: 'Large', px: 17 },
+  { label: 'Larger', px: 19 },
+  { label: 'Largest', px: 21 },
+];
 
 export async function getSettings() {
   try {
     const { settings } = await chrome.storage.local.get('settings');
-    return { ...DEFAULT_SETTINGS, ...(settings || {}) };
+    const s = { ...DEFAULT_SETTINGS, ...(settings || {}) };
+    // Migrate the old on/off large-text switch.
+    if (settings && 'bigText' in settings && !('textSize' in settings)) s.textSize = settings.bigText ? 3 : 1;
+    delete s.bigText;
+    delete s.contactName;
+    return s;
   } catch {
     return { ...DEFAULT_SETTINGS };
   }

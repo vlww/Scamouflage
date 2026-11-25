@@ -4,7 +4,7 @@
     "max_body_chars": { "defaultValue": { "value": "1800" }, "description": "Email body cap after cleanup (speed vs. context)", "valueType": "NUMBER" },
     "max_links": { "defaultValue": { "value": "8" }, "description": "Max links sent to the model (one per domain)", "valueType": "NUMBER" },
     "escalation_threshold": { "defaultValue": { "value": "70" }, "description": "Offer a cloud second opinion below this on-device confidence", "valueType": "NUMBER" },
-    "ondevice_timeout_ms": { "defaultValue": { "value": "20000" }, "description": "On-device scan timeout before falling back", "valueType": "NUMBER" },
+    "ondevice_timeout_ms": { "defaultValue": { "value": "60000" }, "description": "How long to wait for the on-device model to start answering (it then may not go silent for more than 15 s)", "valueType": "NUMBER" },
     "prompt_version": { "defaultValue": { "value": "v2" }, "description": "Scan rubric: v2 | v2-cautious", "valueType": "STRING" },
     "feature_image_check": { "defaultValue": { "value": "true" }, "description": "Screenshot check on/off", "valueType": "BOOLEAN" },
     "feature_auto_scan": { "defaultValue": { "value": "true" }, "description": "Automatic checks when an email opens", "valueType": "BOOLEAN" },

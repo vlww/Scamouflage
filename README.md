@@ -34,7 +34,7 @@ Everyday people, and especially **older adults and the family members who look o
 
 - **Verdict → one-line why → one clear action.** "Scam. Asks you to pay a fake delivery fee. Don't click, reply, or pay. Delete it."
 - Plain verdict words (**Scam / Be careful / Looks safe**) shown with color, an icon *and* a word, never color alone.
-- Large-text mode, full keyboard support, screen-reader labels, reduced-motion support, and WCAG AA contrast in light and dark themes (checked by `npm run contrast`).
+- A five-step text-size slider, full keyboard support, screen-reader labels, reduced-motion support, and WCAG AA contrast in light and dark themes (checked by `npm run contrast`).
 - **Debrief** answers "I already clicked / paid / shared my password, what now?" with concrete recovery steps.
 - **Tell my family** shares a *redacted* summary with a trusted person.
 
@@ -175,7 +175,7 @@ Other scripts: `npm test` (Vitest, 68 tests) · `npm run lint` · `npm run contr
 1. Download `scamouflage.zip` from the Devpost submission and unzip it. It includes a working App Check debug token.
 2. `chrome://extensions` → **Developer mode** → **Load unpacked** → select the unzipped folder.
 3. For on-device inference, click **Set up on this computer** during onboarding (or in **Settings**) to download Gemini Nano. For on-device screenshot checks also enable `chrome://flags/#prompt-api-multimodal-input` and restart. If your machine can't run Nano, everything still works through the redacted cloud path, and the route chip shows **☁️ Cloud**.
-4. **No Gmail needed:** open the panel → **Paste** → tap a sample (*Delivery fee*, *Bank lock*, *Boss gift cards*, *Tech support*, *Grandkid in trouble*, *Store receipt*) → **Check for scams**.
+4. **No Gmail needed:** open **Settings** → turn on **Demo mode**, then **Paste** → tap a sample (*Delivery fee*, *Bank lock*, *Boss gift cards*, *Tech support*, *Grandkid in trouble*, *Store receipt*) → **Check for scams**.
 5. Try **What if I already clicked?**, tap a warning sign to see its evidence, tap the route chip, and drop a screenshot into **Screenshot**.
 6. To see the hybrid fallback: set `chrome://flags/#optimization-guide-on-device-model` to **Disabled**, restart, and check again. The route chip switches from **🔒 On-device** to **☁️ Cloud · N hidden**. The other way round: with Nano on, turn off Wi-Fi and checks keep working on-device.
 

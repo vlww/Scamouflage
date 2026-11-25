@@ -60,8 +60,7 @@ const PAIRS = [
 const FIXED = [
   // Masthead text sits on the camo + a dark scrim (worst case: lightest blob olive-600 under 45% scrim ≈ #2f3a1e).
   ['#f6f1dc', '#2f3a1e', 4.5, 'header wordmark (worst camo blob)'],
-  ['#e6dcbc', '#2f3a1e', 4.5, 'header tagline (worst camo blob)'],
-  ['#e6dcbc', '#3a3621', 4.5, 'header tagline over khaki blob at lightest scrim'],
+  ['#f6f1dc', '#3a3621', 4.5, 'header wordmark over khaki blob at lightest scrim'],
   ['#ffffff', 'scam', 3, 'hero icon glyph on scam (light)'],
   ['#ffffff', 'warn', 3, 'hero icon glyph on warn (light)'],
   ['#ffffff', 'safe', 3, 'hero icon glyph on safe (light)'],

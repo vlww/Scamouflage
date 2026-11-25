@@ -18,7 +18,7 @@ Scamouflage is a Chrome extension (side panel + a small badge inside Gmail).
 - **Paste** any message, or **drop a screenshot** of a text or DM. Scams aren't only email.
 - **Debrief**: "I already clicked / paid / shared my password, what now?" returns concrete recovery steps in order.
 - **Tell my family**: send a redacted summary to a trusted person who joined with a family code, or copy a ready-to-send text.
-- Large-text mode, dark mode, keyboard and screen-reader support, WCAG AA contrast everywhere.
+- Adjustable text size, dark mode, keyboard and screen-reader support, WCAG AA contrast everywhere.
 
 ## How we built it: Firebase AI Logic hybrid inference
 

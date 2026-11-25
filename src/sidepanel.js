@@ -1,5 +1,5 @@
 import { hydrateIcons, icon, FLAG_ICONS } from './icons.js';
-import { getSettings, saveSettings } from './settings.js';
+import { getSettings, saveSettings, TEXT_SIZES } from './settings.js';
 import { initConfig, cfg } from './config.js';
 import {
   scanEmail, scanImage, secondOpinion, deviceAvailability, prepareDeviceModel, warmUp, startDebrief, streamReply,
@@ -188,7 +188,9 @@ async function refreshGmail({ email: pushed, key: pushedKey, tabId: pushedTab } 
     showVerdict(tab.id, key, 3, { phase: 'done', verdict: cached.result.verdict, source: cached.source });
     return;
   }
-  if (state.settings.autoScan && cfg('feature_auto_scan')) runScan({ auto: true });
+  // Never check behind the onboarding screens: the user can't see it, and a cold model
+  // could time out before they get there.
+  if (state.view !== 'onboarding' && state.settings.autoScan && cfg('feature_auto_scan')) runScan({ auto: true });
 }
 
 function setGmail(email, key, tabId, fallback) {
@@ -334,7 +336,7 @@ function updateScanButton() {
   const busy = !!state.current?.pending;
   btn.hidden = busy || !!showing || (state.mode === 'gmail' && !state.gmail.email);
   btn.disabled = !ready;
-  $('trySample').hidden = !(state.mode === 'gmail' && !state.gmail.email);
+  $('trySample').hidden = !(state.settings?.demoMode && state.mode === 'gmail' && !state.gmail.email);
   btn.querySelector('.label').textContent = showing ? 'Check again' : 'Check for scams';
 }
 $('trySample').addEventListener('click', () => {
@@ -410,6 +412,11 @@ async function runScan({ auto }) {
         allowCloud,
         onRoute,
         onPartial,
+        onRetry: () => {
+          if (!live()) return;
+          $('prelim').textContent = 'Your computer’s AI is starting up. One moment…';
+          $('prelim').hidden = false;
+        },
         onRecon: (recon) => {
           if (!live()) return;
           state.current.recon = recon;
@@ -862,7 +869,7 @@ $('familyBtn').addEventListener('click', async () => {
   const cur = state.current;
   if (!cur?.result) return;
   const f = await family();
-  f.openShareSheet({ report: f.buildReport(cur, state.settings.contactName), settings: state.settings, toast, notice, goFamily: () => showView('family') });
+  f.openShareSheet({ report: f.buildReport(cur, state.settings.myName), toast, notice, goFamily: () => showView('family') });
 });
 
 async function renderFamily() {
@@ -883,7 +890,6 @@ const TOGGLES = [
   ['autoScan', 'Check emails as I open them', 'Private: automatic checks only run on this computer.'],
   ['cloudHelp', 'Cloud help', 'When this computer can’t check, or you ask questions. Personal details are hidden first.'],
   ['autoSecondOpinion', 'Automatic second opinion', 'If an on-device check is unsure, ask the cloud too.'],
-  ['bigText', 'Large text', 'Bigger, easier-to-read text.'],
 ];
 
 async function setSetting(key, value) {
@@ -894,34 +900,63 @@ async function setSetting(key, value) {
 
 function applySettings() {
   const s = state.settings;
-  document.documentElement.classList.toggle('big-text', s.bigText);
-  $('bigTextBtn').setAttribute('aria-pressed', s.bigText);
+  document.documentElement.style.fontSize = `${(TEXT_SIZES[s.textSize] || TEXT_SIZES[1]).px}px`;
+  $('sampleRow').hidden = !s.demoMode;
+  updateScanButton();
   if (s.theme === 'auto') delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = s.theme;
 }
 
-$('bigTextBtn').addEventListener('click', () => setSetting('bigText', !state.settings.bigText).then(() => state.view === 'settings' && renderSettings()));
 
 function renderSettings() {
   const box = $('toggles');
-  box.replaceChildren(
-    ...TOGGLES.map(([key, title, sub]) => {
-      const input = h('input', { type: 'checkbox', role: 'switch', id: `t-${key}`, 'aria-describedby': `t-${key}-sub` });
-      input.checked = !!state.settings[key];
-      input.addEventListener('change', () => setSetting(key, input.checked));
-      return h(
-        'label',
-        { class: 'toggle-row', for: `t-${key}` },
-        h('span', { class: 'toggle-text' }, h('span', { class: 'toggle-title', text: title }), h('span', { class: 'toggle-sub', id: `t-${key}-sub`, text: sub })),
-        h('span', { class: 'switch' }, input, h('span', { class: 'track', 'aria-hidden': 'true' }))
-      );
-    }),
-    themeRow()
-  );
-  $('setContact').value = state.settings.contactName;
+  box.replaceChildren(...TOGGLES.map(([key, title, sub]) => toggleRow(key, title, sub)));
+  $('displayGroup').replaceChildren(textSizeRow(), themeRow(), toggleRow('demoMode', 'Demo mode', 'Show sample messages to try Scamouflage without real email.'));
   renderModelStatus();
+  renderFamilyStatus();
   $('aboutLine').textContent = `Scamouflage ${chrome.runtime.getManifest().version} · Firebase AI Logic hybrid inference`;
 }
+
+function toggleRow(key, title, sub) {
+  const input = h('input', { type: 'checkbox', role: 'switch', id: `t-${key}`, 'aria-describedby': `t-${key}-sub` });
+  input.checked = !!state.settings[key];
+  input.addEventListener('change', () => setSetting(key, input.checked));
+  return h(
+    'label',
+    { class: 'toggle-row', for: `t-${key}` },
+    h('span', { class: 'toggle-text' }, h('span', { class: 'toggle-title', text: title }), h('span', { class: 'toggle-sub', id: `t-${key}-sub`, text: sub })),
+    h('span', { class: 'switch' }, input, h('span', { class: 'track', 'aria-hidden': 'true' }))
+  );
+}
+
+function textSizeRow() {
+  const value = h('span', { class: 'size-value', id: 'sizeValue', text: TEXT_SIZES[state.settings.textSize].label });
+  const range = h('input', { type: 'range', id: 'textSize', min: '0', max: String(TEXT_SIZES.length - 1), step: '1', 'aria-describedby': 'sizeValue' });
+  range.value = String(state.settings.textSize);
+  range.setAttribute('aria-valuetext', TEXT_SIZES[state.settings.textSize].label);
+  range.addEventListener('input', () => {
+    const i = +range.value;
+    value.textContent = TEXT_SIZES[i].label;
+    range.setAttribute('aria-valuetext', TEXT_SIZES[i].label);
+    document.documentElement.style.fontSize = `${TEXT_SIZES[i].px}px`; // live preview
+  });
+  range.addEventListener('change', () => setSetting('textSize', +range.value));
+  return h(
+    'div',
+    { class: 'size-row' },
+    h('div', { class: 'size-head' }, h('label', { class: 'toggle-title', for: 'textSize', text: 'Text size' }), value),
+    range,
+    h('div', { class: 'size-scale', 'aria-hidden': 'true' }, h('span', { text: 'A' }), h('span', { text: 'A' }))
+  );
+}
+
+async function renderFamilyStatus() {
+  const { familyCircles = [] } = await chrome.storage.local.get('familyCircles');
+  $('famStatus').textContent = familyCircles.length
+    ? 'Connected. Use “Tell my family” on a warning to share it.'
+    : 'Share warnings with someone you trust.';
+}
+$('famOpen').addEventListener('click', () => showView('family'));
 
 function themeRow() {
   const opts = [['auto', 'Auto'], ['light', 'Light'], ['dark', 'Dark']];
@@ -937,7 +972,6 @@ function themeRow() {
   return h('div', { class: 'toggle-row', style: 'display:block; cursor:default' }, h('span', { class: 'toggle-title', text: 'Theme' }), group);
 }
 
-$('setContact').addEventListener('change', (e) => setSetting('contactName', e.target.value.trim()));
 
 const MODEL_TEXT = {
   available: ['Ready', 'Checks run privately on this computer.'],
@@ -1006,7 +1040,7 @@ $('obNext').addEventListener('click', async () => {
     renderOnboarding();
     return;
   }
-  await saveSettings({ onboarded: true, contactName: $('obContact').value.trim() || state.settings.contactName });
+  await saveSettings({ onboarded: true });
   state.settings = await getSettings();
   showView('check');
   refreshGmail();
@@ -1042,7 +1076,7 @@ function friendlyError(e) {
   if (/quota|429|resource.?exhausted/i.test(msg)) return 'Cloud help is busy right now. Please try again in a minute.';
   if (/ONLY_ON_DEVICE|on-device model is not available/i.test(msg)) return 'This computer’s AI model isn’t ready, and cloud help is off.';
   if (/unreadable answer/i.test(msg)) return 'The check got a garbled answer. Please try again.';
-  if (/longer than/i.test(msg)) return 'The check took too long. Please try again.';
+  if (e?.name === 'TimeoutError' || /no answer started|no progress/i.test(msg)) return 'Your computer’s AI is still starting up. Please try again in a moment.';
   return 'Something went wrong with the check. Please try again.';
 }
 

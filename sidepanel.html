@@ -13,13 +13,9 @@
     <header class="masthead">
       <div class="brand">
         <img src="/icons/icon48.png" alt="" class="logo" width="32" height="32" />
-        <div class="brand-text">
-          <span class="wordmark">Scamouflage</span>
-          <span class="tagline">Scams hide. We spot them.</span>
-        </div>
+        <span class="wordmark">Scamouflage</span>
       </div>
       <nav class="topnav" aria-label="Sections">
-        <button class="icon-btn text" id="bigTextBtn" aria-pressed="false" aria-label="Large text" title="Large text">Aa</button>
         <button class="icon-btn" id="navCheck" data-view="check" aria-label="Check" data-icon="ShieldCheck"></button>
         <button class="icon-btn" id="navFamily" data-view="family" aria-label="Family" data-icon="Users"></button>
         <button class="icon-btn" id="navSettings" data-view="settings" aria-label="Settings" data-icon="Settings"></button>
@@ -51,10 +47,7 @@
             <div class="progress-bar" id="obProgress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
           </div>
           <button class="btn secondary" id="obSetupBtn" hidden>Set up on this computer</button>
-          <label class="field">
-            <span class="field-label">Someone you trust <span class="optional">(optional)</span></span>
-            <input id="obContact" placeholder="e.g. Sam, my son" autocomplete="off" maxlength="40" />
-          </label>
+          <p class="ob-tip"><span data-icon="Users"></span>Later, you can share warnings with family from the Family tab.</p>
         </div>
         <div class="ob-nav">
           <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -78,7 +71,7 @@
               <div id="emailFrom" class="email-from">We’ll check it automatically.</div>
             </div>
           </div>
-          <button id="trySample" class="link-btn" type="button" hidden>No Gmail? Try a sample scam</button>
+          <button id="trySample" class="link-btn" type="button" hidden>Try a sample message</button>
         </div>
 
         <div id="panePaste" role="tabpanel" aria-labelledby="tabPaste" class="pane" hidden>
@@ -91,7 +84,7 @@
             <label class="field"><span class="field-label">From</span><input id="pasteFrom" placeholder="Name &lt;address@example.com&gt;" autocomplete="off" /></label>
             <label class="field"><span class="field-label">Subject</span><input id="pasteSubject" autocomplete="off" /></label>
           </details>
-          <div class="sample-row">
+          <div class="sample-row" id="sampleRow" hidden>
             <span class="muted">Try a sample:</span>
             <div id="sampleChips" class="chips"></div>
           </div>
@@ -199,11 +192,13 @@
           <div class="progress" id="msProgressWrap" hidden><div class="progress-bar" id="msProgress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div></div>
         </div>
         <div class="setting-group" id="toggles"></div>
+        <div class="setting-group" id="displayGroup"></div>
         <div class="setting-group">
-          <label class="field">
-            <span class="field-label">Someone you trust</span>
-            <input id="setContact" placeholder="e.g. Sam, my son" autocomplete="off" maxlength="40" />
-          </label>
+          <div class="model-status">
+            <span data-icon="Users"></span>
+            <div><div class="ms-title">Family sharing</div><div class="ms-sub" id="famStatus">Share warnings with someone you trust.</div></div>
+            <button class="btn secondary small" id="famOpen" type="button">Open</button>
+          </div>
         </div>
         <p class="fineprint" id="aboutLine"></p>
       </section>
