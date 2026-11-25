@@ -475,6 +475,10 @@ textarea { resize: vertical; min-height: 120px; }
 .fineprint { font-size: var(--fs-xs); color: var(--text-muted); text-align: center; }
 
 .card { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-4); background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); }
+.demo-tip { display: flex; flex-direction: column; gap: 6px; padding: var(--sp-3); background: var(--surface-2); border: 1.5px dashed var(--border-strong); border-radius: var(--radius-sm); }
+.demo-tip .muted { font-size: var(--fs-sm); }
+.card > .link-btn { align-self: flex-start; display: inline-flex; gap: 6px; align-items: center; }
+.card > .link-btn svg { width: 16px; height: 16px; }
 .card h2 { font-size: var(--fs-lg); font-weight: 750; }
 .code-box { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); padding: var(--sp-3); border-radius: var(--radius-sm); background: var(--surface-2); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: var(--fs-lg); font-weight: 700; letter-spacing: 0.08em; }
 .row { display: flex; gap: var(--sp-2); flex-wrap: wrap; }

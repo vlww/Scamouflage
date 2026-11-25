@@ -18,6 +18,7 @@ import { app } from './firebase.js';
 import { redact } from './core/redact.js';
 import { icon } from './icons.js';
 import { saveSettings } from './settings.js';
+import { IS_WEB } from './env.js';
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -201,7 +202,11 @@ export async function openShareSheet({ report, toast, notice, goFamily }) {
 
 /* ---------------- UI: Family view ---------------- */
 
-export async function renderFamilyView(root, { settings, toast }) {
+// Web demo only: where a family member can open the invite (a private window = a second person).
+const inviteLink = (code) => `${location.origin}/?join=${pretty(code)}`;
+
+export async function renderFamilyView(root, { settings, toast, joinCode = null }) {
+  const rerender = () => renderFamilyView(root, { settings, toast });
   root.replaceChildren(h('p', { class: 'muted', text: 'Loading…' }));
   let circles;
   try {
@@ -221,13 +226,14 @@ export async function renderFamilyView(root, { settings, toast }) {
       return name;
     };
     const codeInput = h('input', { placeholder: 'ABCDE-12345', maxlength: '11', autocomplete: 'off', 'aria-label': 'Family code' });
+    if (joinCode) codeInput.value = pretty(normalize(joinCode));
     const err = h('p', { class: 'notice error', hidden: true, role: 'alert' });
     const run = async (btn, fn) => {
       btn.disabled = true;
       err.hidden = true;
       try {
         await fn();
-        renderFamilyView(root, { settings, toast });
+        rerender();
       } catch (e) {
         err.textContent = friendly(e);
         err.hidden = false;
@@ -239,21 +245,23 @@ export async function renderFamilyView(root, { settings, toast }) {
     const joinBtn = h('button', { class: 'btn secondary', type: 'button', text: 'Join' });
     joinBtn.onclick = () => run(joinBtn, async () => joinCircle(codeInput.value, await rememberName()));
 
+    const shareCard = h('div', { class: 'card' },
+      h('h2', { text: 'Share my warnings' }),
+      h('p', { class: 'muted', text: 'Create a code and give it to someone you trust. When you tap “Tell my family” on a warning, they’ll see it in their Scamouflage.' }),
+      createBtn
+    );
+    const joinCard = h('div', { class: 'card' },
+      h('h2', { text: joinCode ? 'You’ve been invited' : 'Watch over someone' }),
+      h('p', { class: 'muted', text: joinCode ? 'A family member shared their code with you. Tap Join to see the warnings they share.' : 'Got a code from a family member? Enter it to see the warnings they share.' }),
+      h('div', { class: 'row' }, codeInput, joinBtn)
+    );
     parts.push(
       h('label', { class: 'field' }, h('span', { class: 'field-label', text: 'Your first name' }), nameInput, h('span', { class: 'muted', style: 'font-size: var(--fs-sm)', text: 'Family members see this on warnings you share.' })),
-      h('div', { class: 'card' },
-        h('h2', { text: 'Share my warnings' }),
-        h('p', { class: 'muted', text: 'Create a code and give it to someone you trust. When you tap “Tell my family” on a warning, they’ll see it in their Scamouflage.' }),
-        createBtn
-      ),
-      h('div', { class: 'card' },
-        h('h2', { text: 'Watch over someone' }),
-        h('p', { class: 'muted', text: 'Got a code from a family member? Enter it to see the warnings they share.' }),
-        h('div', { class: 'row' }, codeInput, joinBtn)
-      ),
+      ...(joinCode ? [joinCard, shareCard] : [shareCard, joinCard]),
       err
     );
     root.replaceChildren(...parts);
+    if (joinCode) joinBtn.focus();
     return;
   }
 
@@ -275,6 +283,18 @@ export async function renderFamilyView(root, { settings, toast }) {
           h('button', { class: 'icon-btn small', type: 'button', 'aria-label': 'Copy code', onclick: async () => { await navigator.clipboard.writeText(pretty(c.code)); toast('Code copied.'); } }, icon('Copy'))
         ),
       h('p', { class: 'muted', text: names.length ? `Members: ${names.join(', ')}` : c.role === 'owner' ? 'Share this code with someone you trust.' : '' }),
+      IS_WEB && c.role === 'owner' && joinCode && normalize(joinCode) === c.code &&
+        h('p', { class: 'notice info', text: 'This is your own family code. To join as the family member, open the link in a private window.' }),
+      IS_WEB && c.role === 'owner' &&
+        h('div', { class: 'demo-tip' },
+          h('b', { text: 'Try it as your family member' }),
+          h('span', { class: 'muted', text: 'Open this link in a private window or another browser. That window acts as a second person: join there, then tap “Tell my family” on a warning here and refresh.' }),
+          h('div', { class: 'row' },
+            h('a', { class: 'btn small primary', href: inviteLink(c.code), target: '_blank', rel: 'noopener' }, icon('ExternalLink'), 'Open invite link'),
+            h('button', { class: 'btn small secondary', type: 'button', onclick: async () => { await navigator.clipboard.writeText(inviteLink(c.code)); toast('Link copied. Paste it into a private window.'); } }, icon('Copy'), 'Copy link')
+          )
+        ),
+      h('button', { class: 'link-btn', type: 'button', onclick: rerender }, icon('RefreshCw'), 'Check for new warnings'),
       failed && h('p', { class: 'notice error', text: failed })
     );
     parts.push(card);
@@ -304,7 +324,7 @@ export async function renderFamilyView(root, { settings, toast }) {
         text: c.role === 'owner' ? 'Delete this family code' : 'Leave this family',
         onclick: async () => {
           await leaveCircle(c.code);
-          renderFamilyView(root, { settings, toast });
+          rerender();
         },
       })
     );

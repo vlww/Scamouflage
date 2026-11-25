@@ -3,14 +3,14 @@ import {
   createElement, ShieldCheck, ShieldAlert, ShieldX, ShieldQuestion, TriangleAlert, Lock, Cloud, CloudCog,
   Settings, Users, Image, ImageUp, Mail, ClipboardPaste, Link, Clock, BadgeDollarSign, KeyRound, EyeOff,
   Phone, Gift, Paperclip, Info, X, ChevronRight, SendHorizontal, MessageCircle, Laptop, Ban, Cpu, Copy,
-  UserRound, Globe, Fingerprint, Sparkles, Check, RefreshCw, WifiOff, Share2, LogIn, Trash2, Radar,
+  UserRound, Globe, Fingerprint, Sparkles, Check, RefreshCw, WifiOff, Share2, LogIn, Trash2, Radar, ExternalLink,
 } from 'lucide';
 
 const ICONS = {
   ShieldCheck, ShieldAlert, ShieldX, ShieldQuestion, TriangleAlert, Lock, Cloud, CloudCog, Settings, Users,
   Image, ImageUp, Mail, ClipboardPaste, Link, Clock, BadgeDollarSign, KeyRound, EyeOff, Phone, Gift,
   Paperclip, Info, X, ChevronRight, SendHorizontal, MessageCircle, Laptop, Ban, Cpu, Copy, UserRound, Globe,
-  Fingerprint, Sparkles, Check, RefreshCw, WifiOff, Share2, LogIn, Trash2, Radar,
+  Fingerprint, Sparkles, Check, RefreshCw, WifiOff, Share2, LogIn, Trash2, Radar, ExternalLink,
 };
 
 export function icon(name, size) {

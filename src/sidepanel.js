@@ -905,7 +905,8 @@ async function renderFamily() {
     return;
   }
   const f = await family();
-  f.renderFamilyView(body, { settings: state.settings, toast, notice });
+  f.renderFamilyView(body, { settings: state.settings, toast, notice, joinCode: state.joinCode });
+  state.joinCode = null; // prefill once
 }
 
 /* =========================================================================
@@ -1128,6 +1129,12 @@ addEventListener('online', () => {
     showView('check');
   }
   setMode(IS_WEB ? 'paste' : 'gmail');
+  // Web demo: a family invite link (?join=CODE) opens Family with the code filled in.
+  const join = IS_WEB && new URLSearchParams(location.search).get('join');
+  if (join) {
+    state.joinCode = join;
+    showView('family');
+  }
   // Load Nano into memory now (no gesture needed once downloaded) so the first check is fast.
   warmUp();
   if (!navigator.onLine) notice('You’re offline. Private on-device checks still work.', 'offline');
