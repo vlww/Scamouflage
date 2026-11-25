@@ -42,27 +42,16 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
 });
 
 /**
- * Inbox rows: answer from the cache (a full check of that thread, or an earlier quick look),
- * otherwise from local recon on sender + subject + preview. Recon only labels rows with real
- * warning signs; the side panel (if open) adds on-device quick looks for the rest.
+ * Inbox rows are labelled ONLY with the verdict of a full check of that email (one the user
+ * opened), matched by Gmail thread ID. No guesses from the preview line: they caused false
+ * alarms, and checking every row would put the computer under load.
  */
 async function labelInbox(tabId, rows) {
   const items = [];
   for (const row of rows) {
     let hit = null;
     for (const id of row.threadIds || []) hit ||= await getCached(`t:${id}`);
-    if (hit) {
-      items.push({ rowKey: row.rowKey, rank: 3, state: { phase: 'done', verdict: hit.result.verdict, full: true } });
-      continue;
-    }
-    const quick = await getCached(`q:${row.rowKey}`);
-    if (quick) {
-      items.push({ rowKey: row.rowKey, rank: 2, state: { phase: 'done', verdict: quick.result.verdict, full: false } });
-      continue;
-    }
-    const recon = runRecon({ fromName: row.fromName, fromEmail: row.fromEmail, subject: row.subject, body: row.snippet, links: [] });
-    const { verdict } = reconVerdict(recon);
-    if (verdict !== 'safe') items.push({ rowKey: row.rowKey, rank: 1, state: { phase: 'recon', verdict } });
+    if (hit) items.push({ rowKey: row.rowKey, rank: 3, state: { phase: 'done', verdict: hit.result.verdict, full: true } });
   }
   if (items.length) chrome.tabs.sendMessage(tabId, { type: 'SCAMO_ROW_BADGES', items }).catch(() => {});
 }

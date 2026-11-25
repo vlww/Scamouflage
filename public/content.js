@@ -184,8 +184,9 @@
       title = 'Scamouflage is checking this email…';
     } else {
       // Recon only (instant heuristics, panel closed).
-      tone = st.verdict === 'safe' ? 'neutral' : st.verdict;
-      look = st.verdict === 'safe' ? LOOK.neutral : { ...LOOK[st.verdict], label: `${st.warnings} warning sign${st.warnings === 1 ? '' : 's'}` };
+      // Heuristic only: never shown in "Scam" red, so a good email can't look like a scam.
+      tone = st.verdict === 'safe' ? 'neutral' : 'suspicious';
+      look = st.verdict === 'safe' ? LOOK.neutral : { ...LOOK.suspicious, label: `${st.warnings} warning sign${st.warnings === 1 ? '' : 's'}` };
       title = st.verdict === 'safe' ? 'Click to check this email with Scamouflage.' : 'Scamouflage quick check found warning signs. Click for a full check.';
     }
     const glyph = GLYPH[tone] ?? '';
@@ -282,7 +283,8 @@
 
   function renderRow(entry, st) {
     let hostEl = entry.el.querySelector(':scope .scamouflage-row');
-    if (!st || !inboxEnabled) {
+    // Only full checks of opened emails are ever shown on a row.
+    if (!st || !st.full || !inboxEnabled) {
       hostEl?.remove();
       return;
     }
@@ -296,7 +298,7 @@
     hostEl.dataset.sig = sig;
     const root = hostEl.attachShadow({ mode: 'closed' });
     const word = { scam: 'Scam', suspicious: 'Be careful', safe: 'Looks safe' }[st.verdict];
-    const how = st.full ? 'Checked by Scamouflage.' : st.phase === 'recon' ? 'Quick check found warning signs. Open for a full check.' : 'Quick look from the preview. Open the email for a full check.';
+    const how = 'Checked when you opened it.';
     const glyph = { scam: 'm9.5 9.5 5 5m0-5-5 5', suspicious: 'M12 8v4m0 3.5v.01', safe: 'm9 12 2 2 4-4' }[st.verdict];
     root.innerHTML = `<style>${ROW_CSS}</style><span class="pill${look.label ? '' : ' icon-only'}" role="img" aria-label="Scamouflage: ${word}. ${how}" title="Scamouflage: ${word}. ${how}"
       style="--fg:${look.fg};--bg:${look.bg};--bd:${look.bd};--sh:${look.sh}"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="camo" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path class="glyph" d="${glyph}"/></svg>${look.label}</span>`;
@@ -332,8 +334,8 @@
       if (!lastKey) syncInbox();
     } else if (message?.type === 'SCAMO_ROW_BADGES') {
       for (const it of message.items || []) {
-        const prev = rowStates.get(it.rowKey);
-        if (prev && prev.rank > it.rank) continue;
+        if (!it.state?.full) continue;
+        // Latest full check wins (e.g. a second opinion that changed the verdict).
         rowStates.set(it.rowKey, { rank: it.rank, state: it.state });
       }
       for (const e of inboxRows()) renderRow(e, rowStates.get(e.row.rowKey)?.state);

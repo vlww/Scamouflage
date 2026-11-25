@@ -21,7 +21,7 @@ export async function showVerdict(tabId, key, rank, state) {
   let t = null;
   if (state.phase === 'done') t = TOOLBAR[state.verdict];
   else if (state.phase === 'checking') t = TOOLBAR.checking;
-  else if (state.phase === 'recon' && state.verdict !== 'safe') t = TOOLBAR[state.verdict];
+  // Recon is a heuristic first look: never put it on the toolbar as if it were a verdict.
   try {
     await chrome.action.setBadgeText({ tabId, text: t ? t.text : '' });
     if (t) {

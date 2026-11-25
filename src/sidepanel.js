@@ -207,52 +207,7 @@ function saveThreadResult(email, entry) {
   for (const id of email?.threadIds || []) setCached(`t:${id}`, { result: entry.result, source: entry.source });
 }
 
-/* ---------- Inbox quick looks (on-device only, lowest priority) ---------- */
-
-const inboxQueue = { tabId: null, rows: [], running: false };
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-async function queueInbox(tabId, rows) {
-  if (!state.settings?.autoScan || !state.settings.inboxBadges || !cfg('feature_auto_scan')) return;
-  if ((await deviceAvailability()) !== 'available') return;
-  const todo = [];
-  for (const row of rows.slice(0, 30)) {
-    let done = await getCached(`q:${row.rowKey}`);
-    for (const id of row.threadIds || []) done ||= await getCached(`t:${id}`);
-    if (!done) todo.push(row);
-  }
-  // The latest list replaces whatever was queued (e.g. the user changed folders).
-  Object.assign(inboxQueue, { tabId, rows: todo });
-  if (!inboxQueue.running) drainInbox();
-}
-
-async function drainInbox() {
-  inboxQueue.running = true;
-  try {
-    while (inboxQueue.rows.length) {
-      // Always yield to a check the user can see.
-      while (state.current?.pending) await sleep(400);
-      const row = inboxQueue.rows.shift();
-      const tabId = inboxQueue.tabId;
-      try {
-        const out = await scanEmail(
-          { source: 'inbox', fromName: row.fromName, fromEmail: row.fromEmail, subject: row.subject, body: row.snippet, links: [] },
-          { allowCloud: false }
-        );
-        if (!out.result) continue;
-        await setCached(`q:${row.rowKey}`, { result: out.result, source: out.source });
-        chrome.tabs.sendMessage(tabId, { type: 'SCAMO_ROW_BADGES', items: [{ rowKey: row.rowKey, rank: 2, state: { phase: 'done', verdict: out.result.verdict, full: false } }] }).catch(() => {});
-      } catch {
-        // Skip this row; the model may be busy or unavailable.
-      }
-    }
-  } finally {
-    inboxQueue.running = false;
-  }
-}
-
 chrome.runtime.onMessage.addListener((msg, sender) => {
-  if (msg?.type === 'SCAMO_INBOX' && sender.tab) queueInbox(sender.tab.id, msg.rows || []);
   if (msg?.type === 'SCAMO_EMAIL_OPENED' && sender.tab) {
     activeTab().then((tab) => {
       if (tab?.id === sender.tab.id) refreshGmail({ email: msg.email, key: msg.key, tabId: sender.tab.id });
@@ -744,7 +699,8 @@ function renderReconOnly(auto, err) {
   $('loading').hidden = true;
   $('result').hidden = false;
   cur.result = null;
-  renderHero({ verdict: rv.verdict === 'safe' ? 'suspicious' : rv.verdict, why: recon.length ? recon[0].detail : 'No obvious red flags in a quick check.' }, { prelim: true });
+  // Heuristics alone never earn a red "Scam": at most "Be careful?" until the AI has checked.
+  renderHero({ verdict: 'suspicious', why: recon.length ? recon[0].detail : 'No obvious red flags in a quick check.' }, { prelim: true });
   if (rv.verdict === 'safe') {
     $('hero').className = 'hero prelim-state';
     $('heroIcon').replaceChildren(icon('ShieldQuestion'));
@@ -951,7 +907,7 @@ async function renderFamily() {
 const TOGGLES = [
   ['autoScan', 'Check emails as I open them', 'Private: automatic checks only run on this computer.'],
   ['cloudHelp', 'Cloud help', 'When this computer can’t check, or you ask questions. Personal details are hidden first.'],
-  ['inboxBadges', 'Label my inbox', 'Shows a shield next to emails in your inbox. Quick looks run privately on this computer.'],
+  ['inboxBadges', 'Label my inbox', 'Shows the result next to emails you’ve already opened.'],
   ['autoSecondOpinion', 'Automatic second opinion', 'If an on-device check is unsure, ask the cloud too.'],
 ];
 

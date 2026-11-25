@@ -43,7 +43,7 @@ Everyday people, and especially **older adults and the family members who look o
 | Feature | What you see |
 |---|---|
 | **In-Gmail badge** | A small shield next to the open email's subject: *Checking… → Scam / Be careful / Looks safe*. Click it to open the panel. Shadow DOM, so Gmail's CSS can't break it. |
-| **Inbox labels** | Every row in the inbox list gets a small shield: **Scam** / **Careful** / a green shield for safe mail. Emails you've opened show their full verdict, matched by Gmail thread ID. While the panel is open, unchecked rows get a quick **on-device** look from sender, subject and preview, one at a time, always yielding to your own checks. Toggle: *Settings → Label my inbox*. |
+| **Inbox labels** | Emails you've opened keep their verdict in the inbox list: **Scam** / **Careful** / a green shield for safe mail, matched by Gmail thread ID. Unopened emails are never guessed at, so there are no false alarms from preview text and no background load. Toggle: *Settings → Label my inbox*. |
 | **Instant answer** | Local "recon" rules run in about 1 ms and show early warning signs while the AI confirms. |
 | **Streaming verdict** | The verdict appears as soon as the model writes it (about 0.8 s on-device), then the reason and warning signs fill in. |
 | **Pre-scan + cache** | With the panel open, emails are checked as you open them. Results are cached for the session, so re-opening an email is instant (even with the panel closed). |
@@ -81,7 +81,6 @@ flowchart TD
 | **Scan** (Nano ready) | **On-device** | `getGenerativeModel({ mode: ONLY_ON_DEVICE, onDeviceParams: { createOptions: text-only, promptOptions: { responseConstraint } } })` + `generateContentStream` | Private and free. `ONLY_ON_DEVICE` (not `PREFER_…`) guarantees the unredacted email can't be routed to the cloud. |
 | **Scan** (Nano not ready) | Cloud, **redacted** | `mode: PREFER_ON_DEVICE`, `inCloudParams: { model, generationConfig: { responseMimeType: 'application/json', responseJsonSchema } }` | Works on any Chrome. Text is redacted *before* the call, so either route the SDK picks is private. |
 | **Automatic checks** (email opened) | On-device only | same as row 1 | Opening an email never sends anything to the cloud by itself. |
-| **Inbox quick looks** (sender + subject + preview) | On-device only | same as row 1 | Low priority, panel open only. With the panel closed, rows are labelled only from the cache or local rules. |
 | **Cold start** (Nano hasn't started answering after 5 s) | On-device **and** redacted cloud, raced | `ONLY_ON_DEVICE` + `ONLY_IN_CLOUD` | Only for checks the user asked for, with cloud help on. The first route to stream a verdict wins and the other is cancelled. Labelled "still starting up" in Details. Automatic checks wait on-device and explain the wait. |
 | **Scan timed out / failed on-device** | Cloud, redacted | `ONLY_IN_CLOUD` | Only if cloud help is on. A verdict that already streamed is kept instead. |
 | **Second opinion** | Cloud, redacted | `ONLY_IN_CLOUD`, stricter prompt | Only when the on-device result is "Be careful" or under the confidence threshold. |
