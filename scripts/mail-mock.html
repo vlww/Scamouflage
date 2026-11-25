@@ -1,0 +1,49 @@
+<!doctype html>
+<!-- DEV ONLY: an unbranded mail-reader mock that uses Gmail's DOM class names, so public/content.js
+     can be exercised (badge, highlighting) without real Gmail. Served by scripts/preview-server.py at /__mail -->
+<html lang="en"><head><meta charset="utf-8"><title>Mail (mock)</title>
+<style>
+  body { margin: 0; font: 14px/1.5 system-ui, sans-serif; color: #1f1f1f; background: #f6f8fc; }
+  .top { height: 56px; display: flex; align-items: center; padding: 0 20px; gap: 12px; color: #444; }
+  .search { flex: 1; max-width: 640px; height: 44px; border-radius: 22px; background: #e9eef6; }
+  .wrap { margin: 0 16px 16px 16px; background: #fff; border-radius: 16px; padding: 20px 28px 28px; min-height: 80vh; }
+  h2.hP { font-size: 22px; font-weight: 400; margin: 4px 0 18px; display: inline; }
+  .head { margin-bottom: 20px; }
+  .from { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: #7c8c5a; color: #fff; display: grid; place-items: center; font-weight: 600; }
+  span.gD { font-weight: 600; }
+  .addr { color: #5e5e5e; font-size: 12px; }
+  .a3s { max-width: 640px; }
+  .a3s a { color: #0b57d0; }
+</style></head>
+<body>
+  <div class="top"><b>Mail</b><div class="search"></div></div>
+  <div class="wrap">
+    <div class="head"><h2 class="hP">Your account has been locked</h2></div>
+    <div class="adn ads">
+      <div class="from"><div class="avatar">H</div><div><span class="gD" name="Harborview Bank Security" email="security@harborview-alerts.com">Harborview Bank Security</span> <span class="addr">&lt;security@harborview-alerts.com&gt;</span><div class="addr">to me</div></div></div>
+      <div class="a3s">
+        <p>Dear Valued Customer,</p>
+        <p>We detected unusual sign-in activity on your Harborview Bank online account. For your protection, your account has been temporarily locked.</p>
+        <p>To restore access, verify your identity and confirm your card details within 24 hours:</p>
+        <p><a href="https://harborview-verify.top/login?session=a81f">www.harborviewbank.com/secure-login</a></p>
+        <p>Failure to verify will result in permanent account closure.</p>
+        <p>Harborview Bank Fraud Prevention</p>
+      </div>
+    </div>
+  </div>
+<script>
+  // Minimal chrome.runtime for the content script; replays what the extension would send.
+  const listeners = [];
+  window.chrome = { runtime: { id: 'mock', onMessage: { addListener: (f) => listeners.push(f) },
+    sendMessage: async (msg) => {
+      if (msg.type !== 'SCAMO_EMAIL_OPENED') return;
+      const send = (rank, state) => listeners.forEach((f) => f({ type: 'SCAMO_BADGE', key: msg.key, rank, state }, {}, () => {}));
+      send(1, { phase: 'recon', verdict: 'scam', warnings: 3 });
+      setTimeout(() => send(2, { phase: 'checking' }), 200);
+      setTimeout(() => send(3, { phase: 'done', verdict: new URLSearchParams(location.search).get('v') || 'scam', source: 'on_device' }), 1400);
+      setTimeout(() => listeners.forEach((f) => f({ type: 'SCAMO_HIGHLIGHT', evidence: { kind: 'link', host: 'harborview-verify.top' } }, {}, () => {})), 2600);
+    } } };
+</script>
+<script src="/content.js"></script>
+</body></html>

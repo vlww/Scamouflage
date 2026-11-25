@@ -10,6 +10,7 @@ import { DEMO_SAMPLES, toEmail } from './samples.js';
 import { showVerdict, getCached, setCached } from './badge.js';
 
 const $ = (id) => document.getElementById(id);
+const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const h = (tag, attrs = {}, ...kids) => {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -89,7 +90,8 @@ function showView(name) {
     if (btn.dataset.view === name) btn.setAttribute('aria-current', 'page');
     else btn.removeAttribute('aria-current');
   }
-  document.querySelector('.topnav').hidden = name === 'onboarding';
+  // During onboarding only the large-text button stays: that's when it's needed most.
+  for (const btn of document.querySelectorAll('.topnav [data-view]')) btn.hidden = name === 'onboarding';
   if (name === 'settings') renderSettings();
   if (name === 'family') renderFamily();
 }
@@ -226,7 +228,7 @@ for (const s of DEMO_SAMPLES) {
         $('pasteFrom').value = s.from;
         $('pasteSubject').value = s.subject;
         $('pasteBody').value = s.body;
-        $('pasteFrom').closest('details').open = !!(s.from || s.subject);
+        $('pasteFrom').closest('details').open = false;
         state.sampleLinks = s.links ? { body: s.body, links: s.links } : null;
         clearResult();
         updateScanButton();
@@ -330,10 +332,15 @@ function updateScanButton() {
     (state.mode === 'image' && state.image);
   const showing = state.current && !state.current.pending && state.current.result;
   const busy = !!state.current?.pending;
-  btn.hidden = busy || (!!showing && state.mode !== 'paste');
+  btn.hidden = busy || !!showing || (state.mode === 'gmail' && !state.gmail.email);
   btn.disabled = !ready;
+  $('trySample').hidden = !(state.mode === 'gmail' && !state.gmail.email);
   btn.querySelector('.label').textContent = showing ? 'Check again' : 'Check for scams';
 }
+$('trySample').addEventListener('click', () => {
+  setMode('paste', { focus: true });
+  $('sampleChips').firstElementChild?.click();
+});
 $('scanBtn').addEventListener('click', () => {
   warmUp(); // first user gesture: make sure Nano is resident for this and later scans
   runScan({ auto: false });
@@ -383,6 +390,7 @@ async function runScan({ auto }) {
   $('prelim').hidden = true;
   setStep('stepRecon');
   updateScanButton();
+  if (!auto) $('loading').scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' });
   if (tabId != null) showVerdict(tabId, key, 2, { phase: 'checking' });
 
   const onPartial = (p, source) => {
@@ -467,8 +475,10 @@ function renderStreaming() {
   const cur = state.current;
   const p = cur.partial;
   if (!p?.verdict) return;
+  const first = $('result').hidden;
   $('loading').hidden = true;
   $('result').hidden = false;
+  if (first) $('hero').scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' });
   renderHero({ verdict: p.verdict, confidence: p.confidence, why: p.why || '' }, { streaming: true });
   $('flags').replaceChildren();
   $('actionBox').hidden = true;
@@ -527,8 +537,17 @@ function renderAction(r) {
   const btn = $('actionBtn');
   btn.hidden = false;
   if (r.verdict === 'scam') {
-    btn.textContent = 'What if I already clicked?';
-    btn.onclick = () => openDebrief('I already clicked the link');
+    // Ask about the thing this scam actually wanted the reader to do.
+    const types = new Set([...r.flags.map((f) => f.type), ...(state.current.recon || []).map((f) => f.type)]);
+    const [label, question] = types.has('payment_request')
+      ? ['What if I already paid?', 'I already paid or sent money']
+      : types.has('credential_request')
+        ? ['What if I shared my password?', 'I shared my password or a code']
+        : types.has('call_now')
+          ? ['What if I already called them?', 'I already called the number']
+          : ['What if I already clicked?', 'I already clicked the link'];
+    btn.textContent = label;
+    btn.onclick = () => openDebrief(question);
   } else if (r.verdict === 'suspicious') {
     const canSecond = state.current.source === 'on_device' && !state.current.second && state.settings.cloudHelp && !state.current.image;
     btn.textContent = canSecond ? 'Get a second opinion' : 'How do I check safely?';

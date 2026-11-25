@@ -12,6 +12,8 @@ class H(http.server.SimpleHTTPRequestHandler):
         if path == '/__shim.js':
             body = open(os.path.join(ROOT, 'scripts/preview-shim.js'), 'rb').read()
             return self._send(body, 'text/javascript')
+        if path == '/__mail':
+            return self._send(open(os.path.join(ROOT, 'scripts/mail-mock.html'), 'rb').read(), 'text/html')
         if path == '/__samples.js':
             body = open(os.path.join(ROOT, 'src/samples.js'), 'rb').read()
             return self._send(body, 'text/javascript')

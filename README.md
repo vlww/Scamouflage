@@ -7,8 +7,12 @@ Scamouflage is a Chrome extension that checks the email you have open in Gmail, 
 Built for **#BuildHybridAI 2026** (Web/Chrome track) with **Firebase AI Logic hybrid inference**.
 
 <p align="center">
-  <img src="docs/screenshots/scam-light.png" width="300" alt="Scamouflage side panel showing a Scam verdict with warning signs">
-  <img src="docs/screenshots/gmail-badge.png" width="300" alt="The Scamouflage badge next to an email subject in Gmail">
+  <img src="docs/screenshots/scam-light.png" width="280" alt="Side panel: Scam verdict, one-line reason, one action, warning signs">
+  <img src="docs/screenshots/safe-dark.png" width="280" alt="Side panel in dark mode: Looks safe">
+</p>
+<p align="center">
+  <img src="docs/screenshots/gmail-badge.png" width="580" alt="The Scamouflage shield badge next to an email subject, with the disguised link highlighted">
+  <br><sub>Real on-device results on invented sample emails. The badge is shown on an unbranded mail mock (<code>scripts/mail-mock.html</code>) that uses Gmail's DOM structure.</sub>
 </p>
 
 ---
