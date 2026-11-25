@@ -15,6 +15,8 @@ export const DEFAULTS = {
   escalation_threshold: 70,
   // How long to wait for Gemini Nano to START answering (cold starts can be slow).
   ondevice_timeout_ms: 60000,
+  // If on-device hasn't started answering a user-requested check by then, race redacted cloud help.
+  hedge_ms: 5000,
   prompt_version: DEFAULT_PROMPT_VERSION,
   feature_image_check: true,
   feature_auto_scan: true,

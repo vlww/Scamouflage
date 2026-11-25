@@ -80,7 +80,8 @@ flowchart TD
 | **Scan** (Nano ready) | **On-device** | `getGenerativeModel({ mode: ONLY_ON_DEVICE, onDeviceParams: { createOptions: text-only, promptOptions: { responseConstraint } } })` + `generateContentStream` | Private and free. `ONLY_ON_DEVICE` (not `PREFER_…`) guarantees the unredacted email can't be routed to the cloud. |
 | **Scan** (Nano not ready) | Cloud, **redacted** | `mode: PREFER_ON_DEVICE`, `inCloudParams: { model, generationConfig: { responseMimeType: 'application/json', responseJsonSchema } }` | Works on any Chrome. Text is redacted *before* the call, so either route the SDK picks is private. |
 | **Automatic checks** (email opened) | On-device only | same as row 1 | Opening an email never sends anything to the cloud by itself. |
-| **Scan timed out / failed on-device** | Cloud, redacted | `ONLY_IN_CLOUD` | Only if cloud help is on. Labelled "On-device was slow" in Details. A verdict that already streamed is kept instead. |
+| **Cold start** (Nano hasn't started answering after 5 s) | On-device **and** redacted cloud, raced | `ONLY_ON_DEVICE` + `ONLY_IN_CLOUD` | Only for checks the user asked for, with cloud help on. The first route to stream a verdict wins and the other is cancelled. Labelled "still starting up" in Details. Automatic checks wait on-device and explain the wait. |
+| **Scan timed out / failed on-device** | Cloud, redacted | `ONLY_IN_CLOUD` | Only if cloud help is on. A verdict that already streamed is kept instead. |
 | **Second opinion** | Cloud, redacted | `ONLY_IN_CLOUD`, stricter prompt | Only when the on-device result is "Be careful" or under the confidence threshold. |
 | **Screenshot** | On-device (multimodal) | `expectedInputs: [text, image]` + `inlineData` (JPEG/PNG) | Images can't be redacted, so cloud is used only if cloud help is on. Other formats are converted to PNG first. |
 | **Debrief** | Cloud, redacted | `startChat()` + `sendMessageStream` | Multi-turn chat isn't supported on-device. |
@@ -95,7 +96,7 @@ The original prototype took **7.9–9.2 s** for the sample scam on-device, with 
 2. **Shrunk input**: quoted replies, forwarded history, signatures, legal footers and invisible characters are stripped, the body is capped at about 1,800 chars, and links are kept one per domain, max 8 (mismatched links first).
 3. **Streaming + partial-JSON parsing** (`src/core/partial-json.js`): the verdict renders the moment its string closes.
 4. **Text-only sessions**: the SDK's default declares image input for every session. Text scans now use `expectedInputs: [text]`, and only the screenshot model asks for images.
-5. **Instant recon** answer at about 1 ms, plus a **warm-up** session per panel open so the first check doesn't pay the cold start.
+5. **Instant recon** answer at about 1 ms, plus a **real warm-up** when the panel opens: a one-word prompt that loads Nano's weights. Creating a session alone doesn't, and the first check after Chrome starts used to take about 20 s. A first-time user's model warms up while they read onboarding. If a check still hits a cold model, a redacted cloud request is raced after 5 s (see the routing table).
 6. **Pre-scan + session cache** keyed by a content hash.
 
 | Measured on-device (Gemini Nano, Chrome 158, Apple Silicon) | Before | After |
@@ -123,7 +124,7 @@ Timings are logged in development builds (`npm run dev`) as `[Scamouflage] ⏱ s
 |---|---|
 | **Firebase AI Logic** (Gemini Developer API) | Hybrid on-device/cloud scan, structured JSON output both ways, streaming, multimodal screenshot check, Debrief chat |
 | **App Check** | Protects the AI Logic endpoint. reCAPTCHA can't run on `chrome-extension://` pages, so the extension uses an App Check **debug token**, which the hackathon rules allow. |
-| **Remote Config** | `cloud_model`, `max_body_chars`, `max_links`, `escalation_threshold`, `ondevice_timeout_ms`, `prompt_version`, `feature_image_check`, `feature_auto_scan`, `feature_family`: tune speed/accuracy and switch features without republishing. Cached values apply instantly; new ones are fetched in the background. |
+| **Remote Config** | `cloud_model`, `max_body_chars`, `max_links`, `escalation_threshold`, `ondevice_timeout_ms`, `hedge_ms`, `prompt_version`, `feature_image_check`, `feature_auto_scan`, `feature_family`: tune speed/accuracy and switch features without republishing. Cached values apply instantly; new ones are fetched in the background. |
 | **Authentication** | Anonymous sign-in via `firebase/auth/web-extension` (MV3 can't load remote code) for family sharing |
 | **Cloud Firestore** (Lite SDK) | Family circles and shared redacted reports, with tight security rules |
 
@@ -158,7 +159,7 @@ Requirements: Chrome desktop 139+, Node 20+.
 3. `chrome://extensions` → **Developer mode** → **Load unpacked** → choose `dist/`.
 4. Open Gmail (reload Gmail tabs that were already open), click the Scamouflage icon, and open an email. The first run walks you through a 3-step setup, including downloading the on-device model.
 
-Other scripts: `npm test` (Vitest, 68 tests) · `npm run lint` · `npm run contrast` (WCAG check) · `npm run eval` · `npm run zip` (builds `scamouflage.zip`).
+Other scripts: `npm test` (Vitest, 76 tests, including the on-device/cloud race) · `npm run lint` · `npm run contrast` (WCAG check) · `npm run eval` · `npm run zip` (builds `scamouflage.zip`).
 
 ### Using your own Firebase project
 
@@ -185,4 +186,4 @@ Everything in this repository was written during #BuildHybridAI 2026. The first 
 
 ## Credits & license
 
-[Apache 2.0](LICENSE). Icons: [Lucide](https://lucide.dev) (ISC). Wordmark font: Saira Stencil One (SIL OFL 1.1), bundled locally. No third-party logos or trademarks appear in the UI, samples or demo assets: every brand in the samples is invented.
+[Apache 2.0](LICENSE). Icons: [Lucide](https://lucide.dev) (ISC). No third-party logos or trademarks appear in the UI, samples or demo assets: every brand in the samples is invented.

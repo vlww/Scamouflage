@@ -74,8 +74,11 @@ export function prepareDeviceModel(onProgress) {
 let warmSession = null;
 let warming = null;
 /**
- * Loads Nano into memory once per panel session so the first scan doesn't pay the cold start.
- * The SDK creates a fresh session per request; holding one session keeps the model resident.
+ * Loads Gemini Nano into memory so the first real check doesn't pay the cold start.
+ * Creating a session alone doesn't load the weights; a one-word prompt does. We keep that
+ * session alive so the model stays resident while the panel is open. Called when the panel
+ * opens (so a first-time user's model warms up while they read onboarding) and after the
+ * model finishes downloading.
  */
 export function warmUp() {
   // One attempt at a time: if Chrome's model service is stuck, don't pile up pending creates.
@@ -84,10 +87,12 @@ export function warmUp() {
     const t0 = performance.now();
     try {
       warmSession = await self.LanguageModel.create(TEXT_CREATE);
-      const ms = Math.round(performance.now() - t0);
-      logTimings('warm-up (session create, cold)', { ms });
-      return ms;
+      const created = Math.round(performance.now() - t0);
+      await warmSession.prompt('Reply with one word: ready');
+      logTimings('warm-up', { createMs: created, firstPromptMs: Math.round(performance.now() - t0) - created });
+      return Math.round(performance.now() - t0);
     } catch {
+      warmSession = null;
       return null;
     } finally {
       warming = null;
@@ -166,12 +171,12 @@ async function runStream(m, request, { onPartial, t, firstTokenMs = 60000, idleM
 
 /**
  * Scans an email.
- * opts: { allowCloud, onRecon, onPartial, onRoute, signal }
+ * opts: { allowCloud, onRecon, onPartial, onRoute, onRetry, onSlow, signal }
  * Returns { result, source, redactedCount, recon, timings, note } where source is
  * 'on_device' | 'in_cloud' | 'recon_only'.
  */
 export async function scanEmail(email, opts = {}) {
-  const { allowCloud = true, onRecon, onPartial, onRoute, onRetry, signal } = opts;
+  const { allowCloud = true, onRecon, onPartial, onRoute, onRetry, onSlow, signal } = opts;
   const t = timer();
 
   // 1. Recon on the full email (instant first answer).
@@ -197,14 +202,14 @@ export async function scanEmail(email, opts = {}) {
     return { result, source, redactedCount, recon, timings, note };
   };
 
-  const cloudCall = async (note) => {
+  const cloudCall = async (note, { partial = onPartial, route = onRoute, abort = signal } = {}) => {
     const { email: safe, count } = redactEmail(prepared);
     const prompt = scanPrompt(safe, recon.map((f) => ({ ...f, detail: redact(f.detail).text })), version);
-    stats.inChars = prompt.length;
-    onRoute?.({ source: InferenceSource.IN_CLOUD, redactedCount: count, note });
+    stats.inChars ||= prompt.length;
+    route?.({ source: InferenceSource.IN_CLOUD, redactedCount: count, note });
     // PREFER_ON_DEVICE on purpose: the text is already redacted, so either route is private.
     const m = avail === 'available' ? model('text', InferenceMode.ONLY_IN_CLOUD) : model('text', InferenceMode.PREFER_ON_DEVICE);
-    const { text, source } = await runStream(m, prompt, { onPartial, t, firstTokenMs: 30000, signal });
+    const { text, source } = await runStream(m, prompt, { onPartial: partial, t, firstTokenMs: 30000, signal: abort });
     return finish(text, source ?? InferenceSource.IN_CLOUD, count, note);
   };
 
@@ -212,24 +217,99 @@ export async function scanEmail(email, opts = {}) {
     const prompt = scanPrompt(prepared, recon, version);
     stats.inChars = prompt.length;
     onRoute?.({ source: InferenceSource.ON_DEVICE, redactedCount: 0 });
-    const onDevice = () => runStream(model('text', InferenceMode.ONLY_ON_DEVICE), prompt, { onPartial, t, firstTokenMs, signal });
-    try {
-      let out;
+
+    // The first route to stream a verdict "owns" the screen; the other one's output is ignored.
+    let winner = null;
+    let onClaim;
+    const claimed = new Promise((res) => (onClaim = res));
+    let cloudRoute = null;
+    const hedgeAbort = new AbortController();
+    signal?.addEventListener('abort', () => hedgeAbort.abort());
+    const claim = (who) => (p, src) => {
+      if (!winner) {
+        winner = who;
+        if (who === 'cloud') onRoute?.(cloudRoute);
+        else hedgeAbort.abort(); // on-device won: stop the backup cloud request
+        onClaim(who);
+      }
+      if (winner === who) onPartial?.(p, src);
+    };
+
+    let hedge = null;
+    const run = () => runStream(model('text', InferenceMode.ONLY_ON_DEVICE), prompt, { onPartial: claim('device'), t, firstTokenMs, signal });
+    const device = (async () => {
       try {
-        out = await onDevice();
+        return await run();
       } catch (e) {
-        // One quiet retry: a cold start or a stuck session usually clears on the second try.
-        if (e.name !== 'TimeoutError' || signal?.aborted) throw e;
+        // One quiet retry (cold start / stuck session), unless cloud help is already covering.
+        if (e.name !== 'TimeoutError' || signal?.aborted || hedge) throw e;
         console.warn('[Scamouflage] On-device check timed out; retrying once:', e.message);
         onRetry?.();
-        out = await onDevice();
+        return run();
       }
-      return finish(out.text, InferenceSource.ON_DEVICE, 0);
+    })();
+
+    // Slow start (usually a cold model right after Chrome launches). For a check the user
+    // asked for, with cloud help on, race a redacted cloud request so they aren't left waiting.
+    // Automatic checks stay on-device and just explain the wait.
+    let startHedge;
+    const hedgeStarted = new Promise((res) => (startHedge = res));
+    const slowTimer = setTimeout(() => {
+      if (winner || t.marks.firstToken != null) return;
+      onSlow?.({ hedging: allowCloud });
+      if (!allowCloud) return;
+      t.mark('hedge');
+      hedge = cloudCall('warming', {
+        abort: hedgeAbort.signal,
+        partial: claim('cloud'),
+        route: (r) => {
+          cloudRoute = r;
+        },
+      });
+      hedge.catch(() => {}); // an aborted/failed backup is fine; the race handles outcomes
+      startHedge();
+    }, cfg('hedge_ms'));
+
+    try {
+      const out = await (async () => {
+        const never = new Promise(() => {});
+        const deviceDone = device.then((o) => ({ who: 'device', o }), (e) => ({ who: 'device', e }));
+        let cloudDone = null;
+        let cloudFailed = false;
+        for (;;) {
+          const ev = await Promise.race([
+            claimed.then((who) => ({ claim: who })),
+            deviceDone,
+            cloudDone || (cloudFailed ? never : hedgeStarted.then(() => ({ hedge: true }))),
+          ]);
+          if (ev.hedge) {
+            cloudDone = hedge.then((o) => ({ who: 'cloud', o }), (e) => ({ who: 'cloud', e }));
+            continue;
+          }
+          if (ev.claim === 'device') return { who: 'device', o: await device };
+          if (ev.claim === 'cloud') return { who: 'cloud', o: await hedge };
+          if (ev.o) return ev; // finished before streaming a verdict (rare)
+          if (ev.who === 'device') {
+            if (cloudDone) {
+              const c = await cloudDone;
+              if (c.o) return c;
+            }
+            throw ev.e;
+          }
+          // The cloud race failed before claiming: ignore it and keep waiting for the device.
+          cloudDone = null;
+          cloudFailed = true;
+        }
+      })();
+      if (out.who === 'cloud') return out.o; // already finished (redacted, labelled 'warming')
+      return finish(out.o.text, InferenceSource.ON_DEVICE, 0);
     } catch (e) {
-      if (signal?.aborted) throw e;
+      if (signal?.aborted || hedge) throw e;
       if (!allowCloud) throw e;
       console.warn('[Scamouflage] On-device scan failed, retrying in the cloud (redacted):', e.message);
       return cloudCall(e.name === 'TimeoutError' ? 'slow' : 'failed');
+    } finally {
+      clearTimeout(slowTimer);
     }
   }
 

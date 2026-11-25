@@ -412,6 +412,13 @@ async function runScan({ auto }) {
         allowCloud,
         onRoute,
         onPartial,
+        onSlow: ({ hedging }) => {
+          if (!live()) return;
+          $('prelim').textContent = hedging
+            ? 'Your computer’s AI is waking up, so we’re also asking cloud help (personal details hidden)…'
+            : 'The first check after Chrome starts takes a little longer. The next ones are much faster.';
+          $('prelim').hidden = false;
+        },
         onRetry: () => {
           if (!live()) return;
           $('prelim').textContent = 'Your computer’s AI is starting up. One moment…';
@@ -673,6 +680,7 @@ const NOTE_TEXT = {
   no_device: 'This Chrome doesn’t have the built-in AI model.',
   downloading: 'The built-in AI model is still downloading.',
   slow: 'The built-in AI model was too slow this time.',
+  warming: 'This computer’s AI was still starting up, so cloud help answered first.',
   failed: 'The built-in AI model had a problem this time.',
 };
 
