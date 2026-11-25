@@ -1,0 +1,124 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model (see src/family.js)
+// ===============================================================
+//
+// Collection: circles
+// Document ID: random 10-char family code (alphabet of 30 symbols, ~49 bits); knowing the code
+//              is what lets someone join.
+// Fields:
+//   - ownerUid: string (required, immutable) - creator's Firebase Auth uid
+//   - members: list<string> (required, 1..10 uids, owner always included)
+//   - names: map<uid, string> (required, display names ≤ 40 chars, keyed by member uid)
+//   - createdAt: timestamp (required, immutable, server time)
+//
+// Subcollection: circles/{code}/reports
+// Document ID: auto
+// Fields (a REDACTED summary only, never the email body):
+//   - verdict: string (required, 'scam' | 'suspicious' | 'safe')
+//   - confidence: int (required, 0..100)
+//   - why: string (required, ≤ 200)
+//   - flags: list<string> (required, ≤ 3 items)
+//   - subject: string (required, ≤ 140, redacted on the client)
+//   - fromDomain: string (required, ≤ 100)
+//   - source: string (required, 'on_device' | 'in_cloud' | 'image')
+//   - authorName: string (required, ≤ 40)
+//   - authorUid: string (required, == request.auth.uid, immutable)
+//   - createdAt: timestamp (required, server time)
+//
+// Everything else is denied.
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------- Helpers ----------------
+    function signedIn() {
+      return request.auth != null;
+    }
+    function uid() {
+      return request.auth.uid;
+    }
+    function isShortString(v, max) {
+      return v is string && v.size() <= max;
+    }
+    function circle(code) {
+      return get(/databases/$(database)/documents/circles/$(code)).data;
+    }
+    function isMember(code) {
+      return signedIn() && uid() in circle(code).members;
+    }
+
+    // ---------------- Circles ----------------
+    match /circles/{code} {
+      // Members can read their circle. (No `list`: codes can't be enumerated.)
+      allow get: if signedIn() && uid() in resource.data.members;
+      allow list: if false;
+
+      // Create: you own it, you're the only member, and you only name yourself.
+      allow create: if signedIn()
+        && code.size() == 10
+        && request.resource.data.keys().hasOnly(['ownerUid', 'members', 'names', 'createdAt'])
+        && request.resource.data.ownerUid == uid()
+        && request.resource.data.members == [uid()]
+        && request.resource.data.names.keys().hasOnly([uid()])
+        && isShortString(request.resource.data.names[uid()], 40)
+        && request.resource.data.createdAt == request.time;
+
+      // Update: exactly one of
+      //   (a) join: a signed-in non-member adds ONLY themselves (+ their own name), max 10 members
+      //   (b) leave: a member removes ONLY themselves (owner can't leave; they delete instead)
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'names'])
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && (
+          (
+            !(uid() in resource.data.members)
+            && request.resource.data.members.toSet() == resource.data.members.toSet().union([uid()].toSet())
+            && request.resource.data.members.size() == resource.data.members.size() + 1
+            && request.resource.data.members.size() <= 10
+            && request.resource.data.names.diff(resource.data.names).affectedKeys().hasOnly([uid()])
+            && isShortString(request.resource.data.names[uid()], 40)
+          ) || (
+            uid() in resource.data.members
+            && uid() != resource.data.ownerUid
+            && request.resource.data.members.toSet() == resource.data.members.toSet().difference([uid()].toSet())
+            && request.resource.data.names == resource.data.names
+          )
+        );
+
+      allow delete: if signedIn() && resource.data.ownerUid == uid();
+
+      // ---------------- Reports ----------------
+      match /reports/{reportId} {
+        allow read: if isMember(code);
+
+        allow create: if isMember(code)
+          && request.resource.data.keys().hasOnly(['verdict', 'confidence', 'why', 'flags', 'subject', 'fromDomain', 'source', 'authorName', 'authorUid', 'createdAt'])
+          && request.resource.data.keys().hasAll(['verdict', 'confidence', 'why', 'flags', 'subject', 'fromDomain', 'source', 'authorName', 'authorUid', 'createdAt'])
+          && request.resource.data.verdict in ['scam', 'suspicious', 'safe']
+          && request.resource.data.confidence is int
+          && request.resource.data.confidence >= 0 && request.resource.data.confidence <= 100
+          && isShortString(request.resource.data.why, 200)
+          && request.resource.data.flags is list && request.resource.data.flags.size() <= 3
+          && isShortString(request.resource.data.subject, 140)
+          && isShortString(request.resource.data.fromDomain, 100)
+          && request.resource.data.source in ['on_device', 'in_cloud', 'image']
+          && isShortString(request.resource.data.authorName, 40)
+          && request.resource.data.authorUid == uid()
+          && request.resource.data.createdAt == request.time;
+
+        // Reports are immutable; the author (or the circle owner) can delete them.
+        allow update: if false;
+        allow delete: if signedIn()
+          && (resource.data.authorUid == uid() || circle(code).ownerUid == uid());
+      }
+    }
+
+    // Default deny for everything else.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

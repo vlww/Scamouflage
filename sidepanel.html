@@ -3,77 +3,212 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <title>Scamouflage</title>
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
+    <a class="skip" href="#main">Skip to content</a>
+
     <header class="masthead">
-      <img src="/icons/icon48.png" alt="" class="logo" />
-      <div>
-        <h1>Scamouflage</h1>
-        <p class="tagline">Scams hide. We spot them.</p>
+      <div class="brand">
+        <img src="/icons/icon48.png" alt="" class="logo" width="32" height="32" />
+        <div class="brand-text">
+          <span class="wordmark">Scamouflage</span>
+          <span class="tagline">Scams hide. We spot them.</span>
+        </div>
       </div>
-      <button id="bigTextBtn" class="icon-btn" title="Toggle large text" aria-pressed="false">Aa</button>
+      <nav class="topnav" aria-label="Sections">
+        <button class="icon-btn text" id="bigTextBtn" aria-pressed="false" aria-label="Large text" title="Large text">Aa</button>
+        <button class="icon-btn" id="navCheck" data-view="check" aria-label="Check" data-icon="ShieldCheck"></button>
+        <button class="icon-btn" id="navFamily" data-view="family" aria-label="Family" data-icon="Users"></button>
+        <button class="icon-btn" id="navSettings" data-view="settings" aria-label="Settings" data-icon="Settings"></button>
+      </nav>
     </header>
 
-    <section id="deviceBar" class="device-bar" aria-live="polite">
-      <span id="deviceStatus">Checking on-device model…</span>
-      <button id="deployBtn" class="btn small" hidden>Deploy on-device model</button>
-      <progress id="deployProgress" max="100" value="0" hidden></progress>
-    </section>
-
-    <main>
-      <div class="tabs" role="tablist">
-        <button role="tab" id="tabGmail" class="tab active" aria-selected="true">Open email</button>
-        <button role="tab" id="tabPaste" class="tab" aria-selected="false">Paste text</button>
-      </div>
-
-      <section id="gmailPane" class="pane">
-        <p id="emailPreview" class="muted">Open an email in Gmail, then press Scan.</p>
+    <main id="main" tabindex="-1">
+      <!-- ============ Onboarding ============ -->
+      <section id="viewOnboarding" class="view onboarding" hidden aria-labelledby="obTitle">
+        <div class="ob-step" data-step="0">
+          <div class="ob-art" aria-hidden="true"><img src="/icons/icon128.png" alt="" width="96" height="96" /></div>
+          <h1 id="obTitle" class="ob-title">Spot scams before they spot you</h1>
+          <p class="ob-text">Scamouflage checks your emails and messages for scams, right here in Chrome.</p>
+        </div>
+        <div class="ob-step" data-step="1" hidden>
+          <div class="ob-art" aria-hidden="true" data-icon="Lock" data-size="56"></div>
+          <h1 class="ob-title">Private by default</h1>
+          <ul class="ob-list">
+            <li><span data-icon="Laptop"></span>Checks run on this computer.</li>
+            <li><span data-icon="EyeOff"></span>Cloud help only when needed, with your personal details hidden.</li>
+            <li><span data-icon="Ban"></span>Nothing is saved or sold.</li>
+          </ul>
+        </div>
+        <div class="ob-step" data-step="2" hidden>
+          <div class="ob-art" aria-hidden="true" data-icon="Cpu" data-size="56"></div>
+          <h1 class="ob-title">Set up private checking</h1>
+          <p class="ob-text" id="obModelText">Checking your computer…</p>
+          <div class="progress" id="obProgressWrap" hidden>
+            <div class="progress-bar" id="obProgress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+          </div>
+          <button class="btn secondary" id="obSetupBtn" hidden>Set up on this computer</button>
+          <label class="field">
+            <span class="field-label">Someone you trust <span class="optional">(optional)</span></span>
+            <input id="obContact" placeholder="e.g. Sam, my son" autocomplete="off" maxlength="40" />
+          </label>
+        </div>
+        <div class="ob-nav">
+          <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+          <button class="btn primary" id="obNext">Next</button>
+        </div>
       </section>
 
-      <section id="pastePane" class="pane" hidden>
-        <input id="pasteFrom" placeholder="From (e.g. PayPal &lt;support@paypa1-help.com&gt;)" />
-        <input id="pasteSubject" placeholder="Subject" />
-        <textarea id="pasteBody" rows="7" placeholder="Paste the email or message text here…"></textarea>
-        <button id="sampleBtn" class="link-btn">Load a sample scam</button>
-      </section>
+      <!-- ============ Check ============ -->
+      <section id="viewCheck" class="view" hidden>
+        <div class="segmented" role="tablist" aria-label="What to check">
+          <button role="tab" id="tabGmail" aria-controls="paneGmail" aria-selected="true"><span data-icon="Mail"></span>Email</button>
+          <button role="tab" id="tabPaste" aria-controls="panePaste" aria-selected="false" tabindex="-1"><span data-icon="ClipboardPaste"></span>Paste</button>
+          <button role="tab" id="tabImage" aria-controls="paneImage" aria-selected="false" tabindex="-1"><span data-icon="Image"></span>Screenshot</button>
+        </div>
 
-      <button id="scanBtn" class="btn primary big">Scan for scams</button>
-
-      <section id="result" class="result" hidden aria-live="polite">
-        <div id="verdictBanner" class="verdict">
-          <span id="verdictIcon" class="verdict-icon"></span>
-          <div>
-            <div id="verdictLabel" class="verdict-label"></div>
-            <div id="verdictSub" class="verdict-sub"></div>
+        <div id="paneGmail" role="tabpanel" aria-labelledby="tabGmail" class="pane">
+          <div id="emailCard" class="email-card empty">
+            <span class="email-icon" data-icon="Mail"></span>
+            <div class="email-meta">
+              <div id="emailSubject" class="email-subject">Open an email in Gmail</div>
+              <div id="emailFrom" class="email-from">We’ll check it automatically.</div>
+            </div>
           </div>
         </div>
-        <div class="meter" aria-hidden="true"><div id="meterFill"></div></div>
-        <span id="sourceBadge" class="badge"></span>
-        <p id="summary" class="summary"></p>
-        <h2>Intel</h2>
-        <ul id="flags" class="flags"></ul>
-        <h2>Orders</h2>
-        <p id="advice" class="advice"></p>
-        <button id="debriefBtn" class="btn">Request cloud debrief</button>
-        <p class="fineprint" id="debriefNote">
-          The debrief runs in the cloud. Names, emails, phone and account numbers are redacted first.
-        </p>
+
+        <div id="panePaste" role="tabpanel" aria-labelledby="tabPaste" class="pane" hidden>
+          <label class="field">
+            <span class="sr-only">Message text</span>
+            <textarea id="pasteBody" rows="6" placeholder="Paste the email or text message here"></textarea>
+          </label>
+          <details class="more-fields">
+            <summary>Add sender and subject <span class="optional">(optional)</span></summary>
+            <label class="field"><span class="field-label">From</span><input id="pasteFrom" placeholder="Name &lt;address@example.com&gt;" autocomplete="off" /></label>
+            <label class="field"><span class="field-label">Subject</span><input id="pasteSubject" autocomplete="off" /></label>
+          </details>
+          <div class="sample-row">
+            <span class="muted">Try a sample:</span>
+            <div id="sampleChips" class="chips"></div>
+          </div>
+        </div>
+
+        <div id="paneImage" role="tabpanel" aria-labelledby="tabImage" class="pane" hidden>
+          <label id="dropZone" class="dropzone" tabindex="0">
+            <span data-icon="ImageUp" data-size="28"></span>
+            <span class="dz-title">Drop or paste a screenshot</span>
+            <span class="dz-sub">Text messages, social media DMs, pop-ups. Or click to choose.</span>
+            <input id="imageInput" type="file" accept="image/*" class="sr-only" />
+          </label>
+          <figure id="imagePreview" class="image-preview" hidden>
+            <img id="imagePreviewImg" alt="Screenshot to check" />
+            <button class="icon-btn small" id="imageClear" aria-label="Remove screenshot" data-icon="X"></button>
+          </figure>
+        </div>
+
+        <button id="scanBtn" class="btn primary big"><span data-icon="ShieldCheck"></span><span class="label">Check for scams</span></button>
+
+        <!-- Loading -->
+        <section id="loading" class="loading" hidden aria-live="polite">
+          <div class="radar" aria-hidden="true"><span class="blip b1"></span><span class="blip b2"></span><span class="blip b3"></span></div>
+          <ol class="steps" aria-label="Progress">
+            <li id="stepRecon">Recon</li>
+            <li id="stepAnalyze">Analyzing</li>
+            <li id="stepDone">Done</li>
+          </ol>
+          <p id="prelim" class="prelim" hidden></p>
+        </section>
+
+        <!-- Result -->
+        <section id="result" class="result" hidden aria-live="polite" aria-atomic="false">
+          <div id="hero" class="hero">
+            <div class="hero-top">
+              <span id="heroIcon" class="hero-icon" aria-hidden="true"></span>
+              <div class="hero-text">
+                <h2 id="heroWord" class="hero-word"></h2>
+                <p id="heroWhy" class="hero-why"></p>
+              </div>
+            </div>
+            <div class="hero-meta">
+              <div class="sure" id="sureWrap">
+                <div class="sure-bar" aria-hidden="true"><span id="sureFill"></span></div>
+                <span id="sureText" class="sure-text"></span>
+              </div>
+              <button id="routeChip" class="route-chip" aria-haspopup="dialog" aria-expanded="false"></button>
+            </div>
+            <div id="routePop" class="popover" role="dialog" aria-label="Where this check ran" hidden></div>
+          </div>
+
+          <div class="action" id="actionBox">
+            <p id="actionText" class="action-text"></p>
+            <button id="actionBtn" class="btn primary"></button>
+          </div>
+
+          <ul id="flags" class="flags" aria-label="Warning signs"></ul>
+
+          <div class="more-actions">
+            <button class="btn ghost" id="debriefBtn"><span data-icon="MessageCircle"></span>Ask a question</button>
+            <button class="btn ghost" id="familyBtn"><span data-icon="Users"></span>Tell my family</button>
+            <button class="btn ghost" id="secondBtn" hidden><span data-icon="CloudCog"></span>Second opinion</button>
+          </div>
+
+          <details class="details" id="detailsBox">
+            <summary>Details</summary>
+            <div id="detailsBody" class="details-body"></div>
+          </details>
+        </section>
+
+        <!-- Debrief -->
+        <section id="debrief" class="debrief" hidden aria-labelledby="debriefTitle">
+          <div class="debrief-head">
+            <h2 id="debriefTitle">Debrief</h2>
+            <span class="route-chip static cloud"><span data-icon="Cloud"></span>Cloud · details hidden</span>
+          </div>
+          <div id="chatLog" class="chat-log" aria-live="polite"></div>
+          <div id="quickReplies" class="chips quick"></div>
+          <form id="chatForm" class="chat-form">
+            <label class="sr-only" for="chatInput">Your question</label>
+            <input id="chatInput" placeholder="Ask anything about this message" autocomplete="off" />
+            <button class="icon-btn solid" type="submit" aria-label="Send" data-icon="SendHorizontal"></button>
+          </form>
+        </section>
+
+        <div id="notice" class="notice" hidden role="alert"></div>
       </section>
 
-      <section id="debrief" class="debrief" hidden>
-        <h2>Debrief <span class="badge cloud">☁️ Cloud</span></h2>
-        <div id="chatLog" class="chat-log"></div>
-        <form id="chatForm" class="chat-form">
-          <input id="chatInput" placeholder="Ask a follow-up, e.g. “What if I already clicked?”" autocomplete="off" />
-          <button class="btn small" type="submit">Send</button>
-        </form>
+      <!-- ============ Family ============ -->
+      <section id="viewFamily" class="view" hidden aria-labelledby="famTitle">
+        <h1 id="famTitle" class="view-title">Family</h1>
+        <p class="lead">Share warnings with someone you trust. Only a summary is shared. Personal details are always hidden.</p>
+        <div id="familyBody"></div>
       </section>
 
-      <p id="error" class="error" hidden role="alert"></p>
+      <!-- ============ Settings ============ -->
+      <section id="viewSettings" class="view" hidden aria-labelledby="setTitle">
+        <h1 id="setTitle" class="view-title">Settings</h1>
+        <div class="setting-group">
+          <div class="model-status" id="modelStatus">
+            <span data-icon="Cpu"></span>
+            <div><div class="ms-title" id="msTitle">On-device model</div><div class="ms-sub" id="msSub">Checking…</div></div>
+            <button class="btn secondary small" id="msSetup" hidden>Set up</button>
+          </div>
+          <div class="progress" id="msProgressWrap" hidden><div class="progress-bar" id="msProgress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div></div>
+        </div>
+        <div class="setting-group" id="toggles"></div>
+        <div class="setting-group">
+          <label class="field">
+            <span class="field-label">Someone you trust</span>
+            <input id="setContact" placeholder="e.g. Sam, my son" autocomplete="off" maxlength="40" />
+          </label>
+        </div>
+        <p class="fineprint" id="aboutLine"></p>
+      </section>
     </main>
 
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
     <script type="module" src="./src/sidepanel.js"></script>
   </body>
 </html>

@@ -1,0 +1,21 @@
+import js from '@eslint/js';
+import globals from 'globals';
+
+export default [
+  { ignores: ['dist/**', 'node_modules/**', '*.zip'] },
+  js.configs.recommended,
+  {
+    files: ['src/**/*.js', 'public/**/*.js', 'scripts/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2024,
+      sourceType: 'module',
+      globals: { ...globals.browser, ...globals.webextensions, LanguageModel: 'readonly', Highlight: 'readonly' },
+    },
+  },
+  { files: ['public/content.js', 'scripts/preview-shim.js'], languageOptions: { sourceType: 'script' } },
+  {
+    files: ['test/**/*.js', 'eval/**/*.mjs', 'scripts/**/*.mjs', '*.config.js'],
+    languageOptions: { ecmaVersion: 2024, sourceType: 'module', globals: { ...globals.node } },
+  },
+  { rules: { 'no-empty': ['error', { allowEmptyCatch: true }], 'no-unused-vars': ['error', { argsIgnorePattern: '^_', caughtErrors: 'none' }] } },
+];
