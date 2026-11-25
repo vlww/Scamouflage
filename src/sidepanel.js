@@ -438,7 +438,7 @@ async function runScan({ auto }) {
     }
   } catch (e) {
     if (!live()) return;
-    console.error('[Scamouflage]', e);
+    console.warn('[Scamouflage] check failed:', e?.message || e);
     state.current.pending = false;
     $('loading').hidden = true;
     if (state.current.recon?.length) renderReconOnly(auto, e);

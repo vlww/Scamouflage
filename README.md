@@ -166,7 +166,7 @@ Other scripts: `npm test` (Vitest, 68 tests) · `npm run lint` · `npm run contr
 2. Firebase console → **AI Logic** → get started with the **Gemini Developer API** (or `npx -y firebase-tools@latest init ailogic`).
 3. **App Check** → register the web app → **Manage debug tokens** → add a token and put it in `.env.local`.
 4. For family sharing: **Authentication → Sign-in method → Anonymous → Enable**, create a **Firestore** database, and deploy the rules: `npx -y firebase-tools@latest deploy --only firestore:rules --project <id>` (a `firebase.json` is included).
-5. Optional: **Remote Config** parameters listed above (defaults are built in).
+5. Optional: **Remote Config**: `npx -y firebase-tools@latest deploy --only remoteconfig --project <id>` publishes `remoteconfig.template.json` (the same defaults are built into the extension).
 
 > The debug token is compiled into `dist/`. Never commit `.env.local`, and revoke the token after judging.
 
