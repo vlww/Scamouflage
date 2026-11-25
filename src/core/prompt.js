@@ -36,7 +36,7 @@ export const VERDICT_SCHEMA = {
 
 const RUBRIC = {
   // Default.
-  v2: `verdict: "scam" = phishing, fraud, impersonation, or asks for money, gift cards, crypto, passwords or codes. "suspicious" = warning signs but could be real. "safe" = ordinary mail (newsletters, receipts, personal notes) with no real warning signs.`,
+  v2: `verdict: "scam" = phishing, fraud, impersonation, or asks for money, gift cards, crypto, passwords or codes. "suspicious" = warning signs but could be real. "safe" = ordinary mail (newsletters, receipts, reminders, personal notes) with no real warning signs. A notice from a company's own domain that only points you to its official app or website, and asks for no money, passwords or codes, is safe.`,
   // Leans cautious: anything asking for money/credentials from an unverified sender is a scam.
   'v2-cautious': `verdict: "scam" = phishing, fraud, impersonation, or ANY request for money, gift cards, crypto, passwords, codes or remote access from a sender you cannot verify. "suspicious" = warning signs but could be real. "safe" = ordinary mail with no warning signs; a matching sender domain alone does not make a request for money safe.`,
 };
@@ -99,6 +99,6 @@ export function normalizeResult(r = {}) {
   const flags = (Array.isArray(r.flags) ? r.flags : [])
     .filter((f) => f && typeof f.text === 'string' && f.text.trim())
     .slice(0, 3)
-    .map((f) => ({ type: FLAG_TYPES.includes(f.type) ? f.type : 'other', text: f.text.trim() }));
+    .map((f) => ({ type: FLAG_TYPES.includes(f.type) ? f.type : 'other', text: f.text.trim().replace(/\.$/, '') }));
   return { verdict, confidence, why: typeof r.why === 'string' ? r.why.trim() : '', flags };
 }

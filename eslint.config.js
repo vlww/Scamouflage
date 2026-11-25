@@ -17,5 +17,7 @@ export default [
     files: ['test/**/*.js', 'eval/**/*.mjs', 'scripts/**/*.mjs', '*.config.js'],
     languageOptions: { ecmaVersion: 2024, sourceType: 'module', globals: { ...globals.node } },
   },
+  { files: ['eval/ondevice.js'], languageOptions: { sourceType: 'script', globals: { ...globals.browser, LanguageModel: 'readonly' } } },
+  { files: ['eval/run.mjs'], languageOptions: { globals: { self: 'writable' } } },
   { rules: { 'no-empty': ['error', { allowEmptyCatch: true }], 'no-unused-vars': ['error', { argsIgnorePattern: '^_', caughtErrors: 'none' }] } },
 ];

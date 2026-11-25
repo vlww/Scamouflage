@@ -72,21 +72,28 @@ export function prepareDeviceModel(onProgress) {
 }
 
 let warmSession = null;
+let warming = null;
 /**
  * Loads Nano into memory once per panel session so the first scan doesn't pay the cold start.
  * The SDK creates a fresh session per request; holding one session keeps the model resident.
  */
-export async function warmUp() {
-  if (warmSession || (await deviceAvailability()) !== 'available') return null;
-  const t0 = performance.now();
-  try {
-    warmSession = await self.LanguageModel.create(TEXT_CREATE);
-    const ms = Math.round(performance.now() - t0);
-    logTimings('warm-up (session create, cold)', { ms });
-    return ms;
-  } catch {
-    return null;
-  }
+export function warmUp() {
+  // One attempt at a time: if Chrome's model service is stuck, don't pile up pending creates.
+  warming ??= (async () => {
+    if (warmSession || (await deviceAvailability()) !== 'available') return null;
+    const t0 = performance.now();
+    try {
+      warmSession = await self.LanguageModel.create(TEXT_CREATE);
+      const ms = Math.round(performance.now() - t0);
+      logTimings('warm-up (session create, cold)', { ms });
+      return ms;
+    } catch {
+      return null;
+    } finally {
+      warming = null;
+    }
+  })();
+  return warming;
 }
 
 /* ---------------- Streaming core ---------------- */
@@ -274,7 +281,9 @@ export function startDebrief(email, verdict) {
     : 'The reader checked a screenshot of a message (not shared here).';
   const verdictLine = `Scanner verdict: ${verdict.verdict} (${verdict.confidence}% sure). ${verdict.why}`;
   const opening = `${context}\n\n${verdictLine}\n\nIn 3 short parts: 1) is it real or a scam, in one sentence; 2) how the trick works; 3) what to do now, as 2-3 numbered steps.`;
-  return { chat, opening, redactedCount: count };
+  const ask = (question) =>
+    `${context}\n\n${verdictLine}\n\nThe reader says: "${question}"\nAnswer them directly: one sentence on whether this is a scam, then numbered steps for exactly their situation, most urgent first.`;
+  return { chat, opening, ask, redactedCount: count };
 }
 
 /** Streams a chat reply; calls onText with the accumulated text. */

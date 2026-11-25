@@ -802,11 +802,11 @@ async function openDebrief(question) {
   }
   $('debrief').hidden = false;
   if (!state.chat) {
-    const { chat, opening } = startDebrief(cur.image ? { image: true } : cur.email, cur.result);
+    const { chat, opening, ask } = startDebrief(cur.image ? { image: true } : cur.email, cur.result);
     state.chat = chat;
     $('chatLog').replaceChildren();
     renderQuickReplies();
-    await send(question ? `${opening}\n\nThe reader says: "${question}"` : opening, question);
+    await send(question ? ask(question) : opening, question);
   } else if (question) {
     await send(question, question);
   }
