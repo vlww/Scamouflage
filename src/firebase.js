@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { initializeAppCheck, CustomProvider, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
+import { initializeAppCheck, getToken, CustomProvider, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 import { getAI, GoogleAIBackend } from 'firebase/ai';
 import { firebaseConfig } from './firebase-config.js';
 import { IS_WEB } from './env.js';
@@ -28,5 +28,8 @@ if (IS_WEB) {
 }
 
 export const app = initializeApp(firebaseConfig);
-initializeAppCheck(app, { provider, isTokenAutoRefreshEnabled: true });
+const appCheck = initializeAppCheck(app, { provider, isTokenAutoRefreshEnabled: true });
+// Web demo: get the reCAPTCHA attestation done while the visitor reads the page, so the first
+// cloud request doesn't wait for it. (The SDK caches the token and reuses it.)
+if (IS_WEB) setTimeout(() => getToken(appCheck).catch(() => {}), 0);
 export const ai = getAI(app, { backend: new GoogleAIBackend() });

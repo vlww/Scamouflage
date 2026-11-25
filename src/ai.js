@@ -25,6 +25,9 @@ const TEXT_IO = [{ type: 'text', languages: ['en'] }];
 const TEXT_CREATE = { expectedInputs: TEXT_IO, expectedOutputs: TEXT_IO };
 const IMAGE_CREATE = { expectedInputs: [...TEXT_IO, { type: 'image' }], expectedOutputs: TEXT_IO };
 const VERDICTS = ['scam', 'suspicious', 'safe'];
+// If Gemini Nano hasn't finished loading yet (it can take 20+ s after Chrome starts), a
+// user-requested check races redacted cloud help almost at once instead of waiting hedge_ms.
+const COLD_HEDGE_MS = 300;
 
 const models = new Map();
 function model(kind, mode) {
@@ -73,6 +76,8 @@ export function prepareDeviceModel(onProgress) {
 
 let warmSession = null;
 let warming = null;
+let warmed = false; // true once a prompt has finished, i.e. the weights are in memory
+let imageWarm = null;
 /**
  * Loads Gemini Nano into memory so the first real check doesn't pay the cold start.
  * Creating a session alone doesn't load the weights; a one-word prompt does. We keep that
@@ -89,6 +94,7 @@ export function warmUp() {
       warmSession = await self.LanguageModel.create(TEXT_CREATE);
       const created = Math.round(performance.now() - t0);
       await warmSession.prompt('Reply with one word: ready');
+      warmed = true;
       logTimings('warm-up', { createMs: created, firstPromptMs: Math.round(performance.now() - t0) - created });
       return Math.round(performance.now() - t0);
     } catch {
@@ -99,6 +105,39 @@ export function warmUp() {
     }
   })();
   return warming;
+}
+
+/** True once Gemini Nano is loaded and answering (the first check will be fast). */
+export const isWarm = () => warmed;
+
+/**
+ * Screenshot checks use a multimodal session, which loads the image encoder on first use.
+ * Called when the Screenshot tab opens so a dropped image doesn't pay that cost.
+ */
+export function warmUpImage() {
+  imageWarm ??= (async () => {
+    if ((await deviceAvailability('image')) !== 'available') return (imageWarm = null);
+    try {
+      const s = await self.LanguageModel.create(IMAGE_CREATE);
+      await s.prompt('Reply with one word: ready');
+      return s;
+    } catch {
+      return (imageWarm = null);
+    }
+  })();
+  return imageWarm;
+}
+
+/** One quiet retry for a dropped connection (not for real errors like App Check or quota). */
+async function retryNet(fn, signal) {
+  try {
+    return await fn();
+  } catch (e) {
+    const msg = String(e?.message || e);
+    if (signal?.aborted || navigator.onLine === false || !/failed to fetch|network ?error|load failed/i.test(msg)) throw e;
+    await new Promise((r) => setTimeout(r, 400));
+    return fn();
+  }
 }
 
 /* ---------------- Streaming core ---------------- */
@@ -209,7 +248,7 @@ export async function scanEmail(email, opts = {}) {
     route?.({ source: InferenceSource.IN_CLOUD, redactedCount: count, note });
     // PREFER_ON_DEVICE on purpose: the text is already redacted, so either route is private.
     const m = avail === 'available' ? model('text', InferenceMode.ONLY_IN_CLOUD) : model('text', InferenceMode.PREFER_ON_DEVICE);
-    const { text, source } = await runStream(m, prompt, { onPartial: partial, t, firstTokenMs: 30000, signal: abort });
+    const { text, source } = await retryNet(() => runStream(m, prompt, { onPartial: partial, t, firstTokenMs: 30000, signal: abort }), abort);
     return finish(text, source ?? InferenceSource.IN_CLOUD, count, note);
   };
 
@@ -268,7 +307,7 @@ export async function scanEmail(email, opts = {}) {
       });
       hedge.catch(() => {}); // an aborted/failed backup is fine; the race handles outcomes
       startHedge();
-    }, cfg('hedge_ms'));
+    }, warmed ? cfg('hedge_ms') : Math.min(cfg('hedge_ms'), COLD_HEDGE_MS));
 
     try {
       const out = await (async () => {
@@ -302,6 +341,7 @@ export async function scanEmail(email, opts = {}) {
         }
       })();
       if (out.who === 'cloud') return out.o; // already finished (redacted, labelled 'warming')
+      warmed = true;
       return finish(out.o.text, InferenceSource.ON_DEVICE, 0);
     } catch (e) {
       if (signal?.aborted || hedge) throw e;

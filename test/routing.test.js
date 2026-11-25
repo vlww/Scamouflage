@@ -25,6 +25,12 @@ vi.mock('firebase/ai', () => {
         const source = mode === InferenceMode.ONLY_ON_DEVICE ? 'on_device' : 'in_cloud';
         const b = behaviour[source];
         calls.push({ source, request, signal: opts?.signal });
+        if (b.failOnce) {
+          const msg = b.failOnce;
+          b.failOnce = null;
+          await sleep(5);
+          throw new Error(msg);
+        }
         if (b.fail) {
           await sleep(b.fail);
           throw new Error(`${source} broke`);
@@ -54,6 +60,20 @@ beforeEach(() => {
 });
 
 describe('scanEmail routing', () => {
+  // Runs first, while the module has never seen Nano answer (cold).
+  it('model still loading: the cloud backup starts at once, not after hedge_ms', async () => {
+    config.hedge_ms = 2000;
+    behaviour.on_device = { start: 600 };
+    behaviour.in_cloud = { start: 10 };
+    try {
+      const out = await scanEmail(email, { allowCloud: true });
+      expect(out.source).toBe('in_cloud');
+      expect(out.note).toBe('warming');
+    } finally {
+      config.hedge_ms = 60;
+    }
+  });
+
   it('fast on-device answer: no cloud request at all', async () => {
     behaviour.on_device = { start: 10 };
     behaviour.in_cloud = { start: 10 };
@@ -121,5 +141,33 @@ describe('scanEmail routing', () => {
   it('cloud not allowed and device breaks: the error surfaces (UI shows the quick-check answer)', async () => {
     behaviour.on_device = { fail: 5 };
     await expect(scanEmail(email, { allowCloud: false })).rejects.toThrow('on_device broke');
+  });
+
+  it('once Nano has answered, a slower start waits the normal hedge_ms', async () => {
+    behaviour.on_device = { start: 10 };
+    await scanEmail(email, { allowCloud: true }); // warm
+    config.hedge_ms = 400;
+    behaviour.on_device = { start: 250 };
+    behaviour.in_cloud = { start: 10 };
+    calls.length = 0;
+    try {
+      const out = await scanEmail(email, { allowCloud: true });
+      expect(out.source).toBe('on_device');
+      expect(calls.map((c) => c.source)).toEqual(['on_device']);
+    } finally {
+      config.hedge_ms = 60;
+    }
+  });
+
+  it('a dropped cloud connection is retried once', async () => {
+    globalThis.LanguageModel.availability = async () => 'unavailable';
+    behaviour.in_cloud = { start: 10, failOnce: 'Failed to fetch' };
+    try {
+      const out = await scanEmail(email, { allowCloud: true });
+      expect(out.source).toBe('in_cloud');
+      expect(calls.filter((c) => c.source === 'in_cloud')).toHaveLength(2);
+    } finally {
+      globalThis.LanguageModel.availability = async () => 'available';
+    }
   });
 });

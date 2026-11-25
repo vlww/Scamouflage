@@ -3,7 +3,7 @@ import { hydrateIcons, icon, FLAG_ICONS } from './icons.js';
 import { getSettings, saveSettings, TEXT_SIZES } from './settings.js';
 import { initConfig, cfg } from './config.js';
 import {
-  scanEmail, scanImage, secondOpinion, deviceAvailability, prepareDeviceModel, warmUp, startDebrief, streamReply,
+  scanEmail, scanImage, secondOpinion, deviceAvailability, prepareDeviceModel, warmUp, warmUpImage, startDebrief, streamReply,
 } from './ai.js';
 import { reconVerdict } from './core/recon.js';
 import { emailKey } from './core/key.js';
@@ -125,6 +125,7 @@ function setMode(mode, { focus = false } = {}) {
   }
   updateScanButton();
   if (mode === 'gmail') refreshGmail();
+  if (mode === 'image') warmUpImage();
 }
 for (const [m, tab] of TABS) {
   $(tab).addEventListener('click', () => setMode(m));
