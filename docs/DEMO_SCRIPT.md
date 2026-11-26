@@ -1,6 +1,6 @@
 # Demo video script (target 2:55, hard limit 3:00)
 
-The story follows one person, a grandmother called **Margaret**, through a morning of email. Every feature appears because she needs it, so the video reads as a product, not a feature tour. The technical claims are shown happening on screen, not just stated.
+The video follows a normal morning of email: a few scams, a few genuine messages. Every feature shows up because the situation calls for it, so it plays like a product, not a feature list. Each technical claim is shown happening on screen, not just stated.
 
 ## What each judging criterion sees
 
@@ -8,7 +8,7 @@ The story follows one person, a grandmother called **Margaret**, through a morni
 |---|---|
 | **Technological implementation** | 1:05–1:45: the architecture diagram, `ONLY_ON_DEVICE` named on screen, Wi-Fi off and it still works, then Nano switched off and the redacted cloud route with "N hidden". The route chip shows the SDK's real `inferenceSource`. |
 | **Design** | 0:25–1:05 and 1:45–2:35: badge → panel → proof → inbox labels → recovery help → screenshot → family. One coherent flow, large text, plain words. |
-| **Potential impact** | 0:00–0:13 hook with sourced numbers. A specific person (Margaret) and a specific moment (opening the email). Family sharing for the adult child. "Free on the Chrome Web Store today." |
+| **Potential impact** | 0:00–0:13 hook with sourced numbers. A specific audience (older adults and their families) and a specific moment (opening the email). Family sharing for the adult child. "Free on the Chrome Web Store today." |
 | **Quality of the idea** | 1:05–1:20: "where each check runs *is* the privacy feature". Automatic checks never leave the computer, and the cloud only sees redacted text. |
 
 ---
@@ -93,22 +93,64 @@ Also have [`docs/demo/sample-text-message.png`](demo/sample-text-message.png) (t
 
 ## 3. The script
 
-Voice-over: about 370 words, read calmly at about 140 words per minute, with short pauses at scene changes. **Bold on-screen text** goes in as captions or overlays.
+About 380 words. Read it calmly, at about 140 words per minute, with a short pause between scenes. "On screen" is what the viewer sees; "Say" is the voice-over; "Caption" is optional text to overlay.
 
-| Time | Screen | Voice-over | On-screen text |
-|---|---|---|---|
-| **0:00–0:13** Hook | Animated stats card (`docs/banners/stats.webp`) over camo. | "Last year, Americans over sixty reported seven point seven five billion dollars lost to online fraud. More than any other age group. And phishing was the most-reported crime of all." | **Source: FBI IC3 2025 report** |
-| **0:13–0:25** Meet Scamouflage | Margaret's inbox, five unread emails. Click the Scamouflage icon; the side panel slides open. | "Meet Margaret. And meet Scamouflage: a Chrome extension that checks her email for scams, right inside Gmail, using Gemini Nano, the AI built into Chrome." | **Scamouflage · Chrome extension** |
-| **0:25–0:52** A scam, caught | Open email 1 (bank lock). Badge: **Checking… → Scam 🔒**. Panel: red Scam verdict, one-line reason, "Don't click…". Tap the link warning sign; the link highlights in the email: *Says harborviewbank.com · Really goes to harborview-verify.top*. | "This one looks like her bank. The moment she opens it, a shield appears. Checking… Scam. In under a second, on her own computer. One verdict, one reason, and one thing to do. And the proof: the link says Harborview Bank, but it really goes somewhere else." | **Verdict in under 1 second · on-device** |
-| **0:52–1:05** Real mail stays calm | Open email 4 (Sam). Badge: **Looks safe**. Back to the inbox: both opened emails keep their labels. | "Real mail gets a calm 'Looks safe'. And back in her inbox, every email she's opened keeps its label, so she can tell at a glance." | |
-| **1:05–1:20** Why it's private | Architecture diagram (`docs/banners/architecture.png`), with the 🔒 ON YOUR COMPUTER box highlighted. Then tap the 🔒 On-device chip in the panel to show its explanation. | "Under the hood, this is Firebase AI Logic hybrid inference, and *where* each check runs is the privacy feature. When Gemini Nano is ready, the full email runs in ONLY_ON_DEVICE mode. It can't reach the cloud, by design." | **`InferenceMode.ONLY_ON_DEVICE`** |
-| **1:20–1:30** Proof: offline | Turn Wi-Fi off (show the menu-bar icon). Open email 3 (gift cards). Badge: **Scam 🔒**. | "Watch: I turn off Wi-Fi, open another email, and it's still caught." | **Wi-Fi off** |
-| **1:30–1:47** The cloud, redacted | *Jump cut.* Show `chrome://flags` with the on-device model **Disabled** (pre-recorded restart). Open email 1 again. The panel shows the quick "Be careful?" answer and **Check with cloud help**; tap it. Chip: **☁️ Cloud · 3 hidden**. Open **Details**: "Hidden first: 3 personal details". | "On a computer without Nano, nothing is sent until she asks. Then Scamouflage removes her name, email and phone number first, and asks Gemini in the cloud. The chip always shows which one ran." | **Personal details removed before the cloud** |
-| **1:47–2:05** "I already paid" | Wi-Fi back on, Nano back on. Open email 2 (delivery fee): **Scam**. Tap **What if I already paid?** The Debrief streams numbered steps. | "And if she already paid? One tap, and she gets calm, numbered steps: call the bank using the number on her card, change her password, report it. No blame. Just what to do now." | |
-| **2:05–2:15** Texts too | **Screenshot** tab. Drag in `sample-text-message.png`. **Scam**, on-device. | "Scams aren't only email. She can drop in a screenshot of a text, and Nano reads that too, still on her computer." | |
-| **2:15–2:33** Family in the loop | Back on email 2, tap **Tell my family → Send to my family**. Cut to the second window (Sam's view, web app): tap **Check for new warnings**; the warning appears. | "And with one tap, she can tell her family. Her son sees the warning on his own screen: just a short summary, never the email. That's Firebase Authentication and Cloud Firestore, with rules that only let family read it." | **Only a summary is shared** |
-| **2:33–2:50** Built to last | Quick montage, 3–4 s each: Settings (text size, cloud help switch) · the landing page with the live demo · the speed table or test run in a terminal. | "App Check protects every AI call. Remote Config tunes the engine without a new release. And Firebase Hosting serves a web app running the same panel. Along the way, the first answer got ten times faster: from nine seconds to under one." | **App Check · Remote Config · Auth · Firestore · Hosting** |
-| **2:50–2:58** Close | Thumbnail lockup (`store/gallery/thumbnail.png`), then the links. | "Scamouflage. Free on the Chrome Web Store today. Spot the scams that are trying to blend in." | **Add to Chrome · scamouflage.xyz** |
+**1. Hook (0:00–0:13)**
+- On screen: the animated stats card (`docs/banners/stats.webp`).
+- Say: "Last year, Americans over sixty reported seven point seven five billion dollars lost to online fraud, more than any other age group. And phishing was the most-reported crime of all."
+- Caption: Source: FBI IC3 2025 report
+
+**2. Introducing Scamouflage (0:13–0:25)**
+- On screen: the inbox with five unread emails. Click the Scamouflage icon and the side panel opens.
+- Say: "Introducing Scamouflage. It's a Chrome extension that checks your email for scams right inside Gmail, using Gemini Nano, the AI that's built into Chrome."
+- Caption: Scamouflage · Chrome extension
+
+**3. A scam, caught (0:25–0:52)**
+- On screen: open email 1 (bank lock). The badge changes from Checking to Scam. The panel shows the reason and what to do. Tap the link warning sign, and the link lights up in the email.
+- Say: "Here's an email that looks like it's from a bank. As soon as it's opened, Scamouflage checks it, and in under a second, it's marked as a scam. That check happened right on this computer. The panel gives one clear reason and one thing to do. And here's the proof: the link says Harborview Bank, but it actually leads somewhere else."
+- Caption: Verdict in under 1 second · on-device
+
+**4. Genuine email (0:52–1:05)**
+- On screen: open email 4 (from Sam). The badge says Looks safe. Go back to the inbox, where both opened emails keep their labels.
+- Say: "When an email is genuine, like this one from family, Scamouflage says it looks safe. And back in the inbox, every opened email keeps its label, so you can tell at a glance."
+
+**5. Why it's private (1:05–1:20)**
+- On screen: the architecture diagram (`docs/banners/architecture.png`), with the "On your computer" box highlighted. Then tap the On-device chip in the panel to show its explanation.
+- Say: "Under the hood, this runs on Firebase AI Logic hybrid inference, and where each check runs is what keeps your email private. When Gemini Nano is available, the full email is checked in on-device-only mode, so it can never reach the cloud."
+- Caption: `InferenceMode.ONLY_ON_DEVICE`
+
+**6. Proof: no internet (1:20–1:30)**
+- On screen: turn Wi-Fi off (show the menu-bar icon). Open email 3 (gift cards). The badge says Scam.
+- Say: "To prove it, I'll turn off Wi-Fi and open another email. The scam is still caught."
+- Caption: Wi-Fi off
+
+**7. The cloud, with details removed (1:30–1:47)**
+- On screen: jump cut to `chrome://flags` with the on-device model set to Disabled (the restart is cut out). Open email 1 again. The panel shows the quick "Be careful?" answer and a Check with cloud help button. Tap it. The chip says Cloud · 3 hidden. Open Details to show "Hidden first: 3 personal details".
+- Say: "On a computer that can't run Nano, nothing is sent until you ask. Then Scamouflage removes personal details like your name, email and phone number, and asks Gemini in the cloud. The label always shows which one was used."
+- Caption: Personal details removed before the cloud
+
+**8. If you already paid (1:47–2:05)**
+- On screen: Wi-Fi and Nano back on. Open email 2 (delivery fee), marked Scam. Tap What if I already paid? and the steps stream in.
+- Say: "And if someone already paid? One tap brings up calm, step-by-step help: call the bank using the number on your card, change your password, and report it."
+
+**9. Text messages too (2:05–2:15)**
+- On screen: the Screenshot tab. Drag in `sample-text-message.png`. It's marked Scam, on-device.
+- Say: "Scams don't only come by email. You can drop in a screenshot of a text message, and Nano checks that on your computer too."
+
+**10. Family (2:15–2:33)**
+- On screen: back on email 2, tap Tell my family, then Send to my family. Cut to the second window (the family member's view in the web app). Tap Check for new warnings, and the warning appears.
+- Say: "With one more tap, you can warn a family member. They see a short summary on their own screen, never the email itself. This uses Firebase Authentication and Cloud Firestore, with rules that only let family members read it."
+- Caption: Only a summary is shared
+
+**11. Built to last (2:33–2:50)**
+- On screen: a quick montage, 3–4 seconds each: Settings (text size, the cloud help switch), the landing page with the live demo, and the tests passing in a terminal.
+- Say: "App Check protects every AI request, Remote Config lets the settings be tuned without a new release, and Firebase Hosting runs a web version of the same app. Along the way, the first answer got ten times faster, from about nine seconds to under one."
+- Caption: App Check · Remote Config · Auth · Firestore · Hosting
+
+**12. Close (2:50–2:58)**
+- On screen: the thumbnail logo (`store/gallery/thumbnail.png`), then the links.
+- Say: "Scamouflage is free on the Chrome Web Store today. Spot the scams that are trying to blend in."
+- Caption: Add to Chrome · scamouflage.xyz
 
 ---
 
