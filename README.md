@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm"><b>🧩 Add to Chrome</b></a> &nbsp;·&nbsp;
-  <a href="https://scamouflage-37a72.web.app"><b>▶ Live web demo</b></a> &nbsp;·&nbsp;
+  <a href="https://scamouflage-37a72.web.app"><b>▶️ Live web demo</b></a> &nbsp;·&nbsp;
   <a href="#testing-guide"><b>✅ Testing guide</b></a>
 </p>
 
@@ -37,7 +37,7 @@ It's made for the people scammers target most: **elderly people, and the family 
 - **Helpful after the fact.** Already clicked or paid? It walks you through what to do now, calmly.
 - **Free, and works anywhere.** One click from the Chrome Web Store. No account. If your computer can't run the on-device model, it still works.
 
-Scamouflage runs as a **Chrome extension** ([Chrome Web Store](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm)) and as a **web app** ([live demo](https://scamouflage-37a72.web.app)) that runs the same panel and the same AI engine. Built for **#BuildHybridAI 2026** (Web/Chrome track), starting Nov 23, 2026.
+Scamouflage runs as a **Chrome extension** ([Chrome Web Store](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm)) and as a **web app** ([live demo](https://scamouflage-37a72.web.app)) that runs the same panel and the same AI engine. Built for **#BuildHybridAI 2026** (Web/Chrome track).
 
 ---
 
