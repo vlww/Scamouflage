@@ -27,7 +27,7 @@ const shot = async (clip, scale = 1) => Buffer.from((await send('Page.captureScr
   await send('Emulation.setDeviceMetricsOverride', { width: 1200, height: 470, deviceScaleFactor: 2, mobile: false });
   await send('Page.navigate', { url: `file://${join(HERE, 'stats.html')}` });
   await sleep(800);
-  const FPS = 30;
+  const FPS = 24;
   const tmp = join(tmpdir(), 'stats-frames');
   rmSync(tmp, { recursive: true, force: true });
   mkdirSync(tmp);
@@ -36,7 +36,7 @@ const shot = async (clip, scale = 1) => Buffer.from((await send('Page.captureScr
   for (let f = 0; f <= 3.6 * FPS; f++) plan.push([f / FPS, Math.round(1000 / FPS)]);
   plan[plan.length - 1][1] = 3500; // hold the finished numbers
   for (let f = Math.round(6.4 * FPS); f <= 7 * FPS; f++) plan.push([f / FPS, Math.round(1000 / FPS)]);
-  const args = ['-loop', '0', '-mixed', '-q', '90', '-m', '6'];
+  const args = ['-loop', '0', '-lossless', '-q', '100', '-m', '6']; // lossless: no blocky artifacts on the camo
   for (const [i, [t, d]] of plan.entries()) {
     await ev(`frame(${t})`);
     const file = join(tmp, `f${String(i).padStart(4, '0')}.png`);

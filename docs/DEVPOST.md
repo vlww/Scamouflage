@@ -58,12 +58,12 @@ Here's how it compares with what people use today:
 
 A lot of us have a parent or grandparent who forwards emails asking "is this real?" And a lot of us know someone who didn't ask in time.
 
-![Scam statistics: $7.7B lost by Americans 60+ in 2025, 191,561 phishing complaints, $15.9B reported to the FTC](https://raw.githubusercontent.com/vlww/Scamouflage/main/docs/banners/stats.webp)
+![Scam statistics: $7.75B lost by Americans 60+ in 2025, 191,561 phishing complaints, $15.9B reported to the FTC](https://raw.githubusercontent.com/vlww/Scamouflage/main/docs/banners/stats.webp)
 
 The numbers are hard to ignore:
 
 - Americans **over 60** reported **$7.75 billion** in losses to the FBI in 2025. That's up **59%** from the year before, more than any other age group, and **$38,500** per person on average ([FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)).
-- **Phishing** was the most-reported crime of all, with 191,561 complaints ([same report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)).
+- **Phishing** was the most-reported crime of all, with 191,561 complaints ([FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)).
 - Most fraud never gets reported. The FTC estimates the real cost to older adults in 2024 was **$10.1–81.5 billion** ([FTC report](https://www.ftc.gov/system/files/ftc_gov/pdf/P144400-OlderAdultsReportDec2025.pdf)).
 
 None of the tools out there fit the moment. Spam filters miss scams written for one person. Scam-checker sites want you to upload your email. Chatbots give you paragraphs when you need a yes or no.

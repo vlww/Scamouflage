@@ -163,7 +163,7 @@ DEVPOST = {
     'devpost-value': ('Value proposition', 'Why it’s worth installing'),
     'devpost-inspiration': ('Inspiration', 'Why I built it'),
     'devpost-what': ('What it does', 'Features'),
-    'devpost-ailogic': ('How I used Firebase AI Logic', 'Hybrid inference'),
+    'devpost-ailogic': ('Firebase AI Logic', 'Hybrid inference'),
     'devpost-how': ('How I built it', 'Engineering'),
     'devpost-design': ('Product design', 'Designing for a scared reader'),
     'devpost-impact': ('Potential impact', 'Real problem, real audience'),

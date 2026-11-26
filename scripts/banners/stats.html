@@ -11,7 +11,7 @@ body { font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-se
 .kicker { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: #b5c98a; text-transform: uppercase; }
 h1 { font-family: 'Russo One', sans-serif; font-weight: 400; font-size: 44px; margin: 6px 0 0; }
 .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-.card { background: rgb(26 31 20 / 0.92); border: 1.5px solid #3b4529; border-radius: 18px; padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 12px; min-height: 230px; box-sizing: border-box; }
+.card { background: rgb(38 58 26 / 0.55); border: 1.5px solid rgb(181 201 138 / 0.35); border-radius: 18px; padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 12px; min-height: 230px; box-sizing: border-box; }
 .num { font-family: 'Russo One', sans-serif; font-size: 56px; color: #f2a39a; line-height: 1; font-variant-numeric: tabular-nums; }
 .what { font-size: 21px; line-height: 1.4; color: #ece5cb; }
 .src { margin-top: auto; font-size: 15px; color: #a8a189; }
@@ -22,7 +22,7 @@ h1 { font-family: 'Russo One', sans-serif; font-weight: 400; font-size: 44px; ma
 <div class="wrap">
   <div id="head"><div class="kicker">Why it matters</div><h1>Scams are costing people billions</h1></div>
   <div class="cards">
-    <div class="card"><div class="num" data-to="7.7" data-fmt="b">$0B</div><div class="bar"></div><div class="what">lost to online fraud by Americans 60+ in 2025, up 59% in a year</div><div class="src">FBI IC3 2025 report</div></div>
+    <div class="card"><div class="num" data-to="7.75" data-fmt="b" data-dec="2">$0.00B</div><div class="bar"></div><div class="what">lost to online fraud by Americans 60+ in 2025, up 59% in a year</div><div class="src">FBI IC3 2025 report</div></div>
     <div class="card"><div class="num" data-to="191561" data-fmt="n">0</div><div class="bar"></div><div class="what">phishing and spoofing complaints in 2025, the most-reported crime</div><div class="src">FBI IC3 2025 report</div></div>
     <div class="card"><div class="num" data-to="15.9" data-fmt="b">$0B</div><div class="bar"></div><div class="what">in fraud losses reported to the FTC in 2025, from 3 million reports</div><div class="src">FTC, March 2026</div></div>
   </div>
@@ -43,7 +43,7 @@ window.frame = (t) => {
     const p = ease((t - start - 0.2) / 1.5);
     const n = c.querySelector('.num');
     const to = +n.dataset.to;
-    n.textContent = n.dataset.fmt === 'b' ? `$${(to * p).toFixed(1)}B` : Math.round(to * p).toLocaleString('en-US');
+    n.textContent = n.dataset.fmt === 'b' ? `$${(to * p).toFixed(+(n.dataset.dec || 1))}B` : Math.round(to * p).toLocaleString('en-US');
     c.querySelector('.bar').style.transform = `scaleX(${p})`;
   });
 };

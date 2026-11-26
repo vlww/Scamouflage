@@ -21,14 +21,13 @@ The checking happens **on your own computer**, using Gemini Nano, the AI model b
 It's made for the people scammers target most: **elderly people, and the family members who look out for them.**
 
 <p align="center">
-  <img src="docs/screenshots/scam-light.png" width="270" alt="Side panel: Scam verdict, one-line reason, one action, warning signs">
+  <img src="docs/screenshots/scam-light-short.png" width="290" alt="Side panel: Scam verdict, one-line reason, one action, warning signs">
   &nbsp;
-  <img src="docs/screenshots/safe-dark.png" width="270" alt="Side panel in dark mode: Looks safe">
+  <img src="docs/screenshots/safe-dark.png" width="290" alt="Side panel in dark mode: Looks safe">
 </p>
 <p align="center">
-  <img src="docs/screenshots/gmail-badge.png" width="560" alt="The Scamouflage shield badge next to an email subject">
+  <img src="docs/screenshots/gmail-badge.png" width="590" alt="The Scamouflage shield badge next to an email subject">
 </p>
-<p align="center"><sub>Real Gemini Nano results on invented sample emails. The Gmail badge is shown on an unbranded mock page that uses Gmail's structure. Every brand you see is made up.</sub></p>
 
 ### Value proposition
 
@@ -46,12 +45,12 @@ Scamouflage runs as a **Chrome extension** ([Chrome Web Store](https://chromeweb
 
 ## Try it in 60 seconds
 
-There are three ways to try Scamouflage. The web demo is the fastest and needs no install. The Chrome extension is the full experience inside Gmail.
+There are three ways to try Scamouflage. The Chrome extension is the full experience inside Gmail. The web demo is the fastest and needs no install.
 
 | | How | What you'll see |
 |---|---|---|
-| **No install** | Open the **[live web demo](https://scamouflage-37a72.web.app)**, tap a sample, press **Check for scams** | The verdict streaming in, its warning signs, and a chip showing where the check ran |
 | **The real thing** | **[Add to Chrome](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm)**, open Gmail, click the Scamouflage icon, open an email | The shield next to the subject, the side panel, and labels in your inbox |
+| **No install** | Open the **[live web demo](https://scamouflage-37a72.web.app)**, tap a sample, press **Check for scams** | The verdict streaming in, its warning signs, and a chip showing where the check ran |
 | **From source** | Follow [Run it yourself](#run-it-yourself) | All of the above, plus timing logs |
 
 Step-by-step instructions for judges are in the **[Testing guide](#testing-guide)**.
@@ -62,12 +61,12 @@ Step-by-step instructions for judges are in the **[Testing guide](#testing-guide
 
 ## The problem
 
-<p align="center"><img src="docs/banners/stats.webp" width="100%" alt="$7.7B lost to online fraud by Americans 60+ in 2025; 191,561 phishing complaints; $15.9B in fraud losses reported to the FTC"></p>
+<p align="center"><img src="docs/banners/stats.webp" width="100%" alt="$7.75B lost to online fraud by Americans 60+ in 2025; 191,561 phishing complaints; $15.9B in fraud losses reported to the FTC"></p>
 
 Scams are growing fast, and older adults lose the most:
 
 - Americans **60 and over** reported **$7.75 billion** in losses to the FBI in 2025. That's **59% more** than the year before, more than any other age group, and **$38,500** per person on average. ([FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf))
-- **Phishing** was the most-reported crime of all, with **191,561** complaints. ([same report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf))
+- **Phishing** was the most-reported crime of all, with **191,561** complaints. ([FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf))
 - The FTC logged **3 million** fraud reports and **$15.9 billion** in losses in 2025. ([FTC, Mar 25 2026](https://www.ftc.gov/news-events/news/press-releases/2026/03/ftc-testifies-joint-economic-committee-agencys-efforts-combat-fraud))
 - Most fraud is never reported. The FTC estimates the real cost to older adults in 2024 at **$10.1–81.5 billion**. ([FTC, *Protecting Older Consumers 2024–2025*](https://www.ftc.gov/system/files/ftc_gov/pdf/P144400-OlderAdultsReportDec2025.pdf))
 
@@ -282,4 +281,4 @@ public/content.js    Gmail script: reads the open email, draws the badge and inb
 test/ · eval/        Tests · accuracy eval
 ```
 
-**License:** [Apache 2.0](LICENSE). Built with the Firebase JS SDK, Vite, Vitest, [Lucide](https://lucide.dev) icons (ISC) and the Russo One font (SIL OFL 1.1). No third-party logos or trademarks appear anywhere: every brand in the samples is invented.
+**License:** [Apache 2.0](LICENSE). Built with the Firebase JS SDK, Vite, Vitest, [Lucide](https://lucide.dev) icons (ISC) and Russo One (SIL OFL 1.1).
