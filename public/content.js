@@ -183,11 +183,11 @@
       look = LOOK.checking;
       title = 'Scamouflage is checking this email…';
     } else {
-      // Recon only (instant heuristics, panel closed).
-      // Heuristic only: never shown in "Scam" red, so a good email can't look like a scam.
-      tone = st.verdict === 'safe' ? 'neutral' : 'suspicious';
-      look = st.verdict === 'safe' ? LOOK.neutral : { ...LOOK.suspicious, label: `${st.warnings} warning sign${st.warnings === 1 ? '' : 's'}` };
-      title = st.verdict === 'safe' ? 'Click to check this email with Scamouflage.' : 'Scamouflage quick check found warning signs. Click for a full check.';
+      // Recon only (instant heuristics, before the AI has checked it). Quick rules can be wrong,
+      // so the badge never shows their result: just a neutral "Check" until the real verdict.
+      tone = 'neutral';
+      look = LOOK.neutral;
+      title = 'Click to check this email with Scamouflage.';
     }
     const glyph = GLYPH[tone] ?? '';
     const lock = st.phase === 'done' && st.source === 'on_device'
