@@ -7,31 +7,35 @@ Upload `store/out/scamouflage-store.zip` (built with `npm run zip`, demo mode of
 **Description** (the summary under the name comes from manifest.json):
 
 ```
-Scamouflage tells you in plain words whether an email or message is a scam, and what to do next. It checks privately on your own computer with Chrome's built-in AI (Gemini Nano).
+Scamouflage is a free Chrome extension that checks your emails for scams, right inside Gmail. Open an email and it tells you in plain words whether it's a scam and what to do next. Checks run privately on your own computer with Chrome's built-in AI (Gemini Nano), usually in under a second.
 
-OPEN AN EMAIL, GET AN ANSWER
-Open an email in Gmail and a small shield appears next to the subject: Scam, Be careful or Looks safe. Usually in under a second, and automatic checks never leave your computer.
+FEATURES
+- A small shield next to the email subject in Gmail: Scam, Be careful or Looks safe
+- One verdict, one reason and one next step, with no jargon
+- Tap a warning sign to see the proof, such as a link that says it's your bank but really goes somewhere else
+- The suspicious link is highlighted in the email itself
+- Emails you've opened keep their result in your inbox list
+- Paste any text message or DM, or drop in a screenshot to check it
+- Step-by-step help if you already clicked a link, paid or shared a password
+- A second opinion from a stronger cloud model when the on-device answer isn't sure
+- Share a warning with a family member in one tap (they see a short summary, never the email)
+- Every result shows whether it was checked on your computer or with cloud help
+- Adjustable text size, dark mode, keyboard and screen-reader support, and high-contrast colors
+- Works on any desktop Chrome, with no account needed
 
-ONE VERDICT, ONE REASON, ONE THING TO DO
-No jargon. "Scam. Asks for a fake delivery fee. Don't click, reply, or pay. Delete it." Tap a warning sign to see the proof, like a link that says your bank but really goes somewhere else. The link is highlighted in the email itself.
+HOW TO USE
+1. Add Scamouflage to Chrome and click its icon in the toolbar to open the side panel.
+2. Follow the short setup. It downloads Chrome's on-device AI model if your computer supports it.
+3. Open Gmail and open any email. The shield appears next to the subject, and the side panel explains the result.
+4. To check a text or DM, use the Paste or Screenshot tab in the side panel.
 
-TEXTS AND SCREENSHOTS TOO
-Paste any message, or drop in a screenshot of a text or DM.
+PRIVACY
+Your emails are checked on your own computer whenever Chrome's built-in AI is available, and automatic checks never leave your computer. If cloud help is needed, names, email addresses, phone, card and account numbers are removed before anything is sent, and you can turn cloud help off entirely in Settings. There are no ads, no tracking and no analytics, and nothing is sold. Full policy: https://scamouflage.xyz/privacy
 
-"I ALREADY CLICKED"
-Get calm, step-by-step help if you already clicked, paid or shared a password.
-
-TELL YOUR FAMILY
-Share a warning with someone you trust in one tap. Only a short summary is shared, never the message.
-
-PRIVATE BY DEFAULT
-• Checks run on your computer whenever Chrome's built-in AI is available.
-• If cloud help is needed, names, email addresses, phone, card and account numbers are removed first. You always see which one ran.
-• Turn cloud help off and Scamouflage works on your computer only.
-• No ads, no tracking, nothing sold.
-
-EASY TO READ
-Adjustable text size, dark mode, keyboard and screen-reader support, and high-contrast colors throughout.
+PERMISSIONS
+- Read Gmail pages: to check the email you open and show the shield next to it. Scamouflage runs on Gmail only.
+- Side panel: to show results and explanations next to your email.
+- Storage: to save your settings and remember emails already checked during your browser session.
 
 Built with Firebase AI Logic hybrid inference. Open source (Apache-2.0): https://github.com/vlww/Scamouflage
 ```
