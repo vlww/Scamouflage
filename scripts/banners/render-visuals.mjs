@@ -21,42 +21,44 @@ const send = (method, params = {}) => new Promise((r) => { const i = ++id; pendi
 const ev = async (expression) => (await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result?.result?.value;
 const shot = async (clip, scale = 1) => Buffer.from((await send('Page.captureScreenshot', { format: 'png', clip: { ...clip, scale } })).result.data, 'base64');
 
-// 1. Animated stats card → WebP
+// 1. Animated stats card → WebP. Rendered at 2× and encoded lossless, so text stays crisp; the
+//    background is static, so only the changing numbers cost bytes. The finished state is held.
 {
-  await send('Emulation.setDeviceMetricsOverride', { width: 1200, height: 470, deviceScaleFactor: 1, mobile: false });
+  await send('Emulation.setDeviceMetricsOverride', { width: 1200, height: 470, deviceScaleFactor: 2, mobile: false });
   await send('Page.navigate', { url: `file://${join(HERE, 'stats.html')}` });
   await sleep(800);
-  const loop = await ev('window.LOOP');
-  const FPS = 15;
-  const n = Math.round(loop * FPS);
+  const FPS = 30;
   const tmp = join(tmpdir(), 'stats-frames');
   rmSync(tmp, { recursive: true, force: true });
   mkdirSync(tmp);
-  const files = [];
-  for (let f = 0; f < n; f++) {
-    await ev(`frame(${f / FPS})`);
-    const file = join(tmp, `f${String(f).padStart(4, '0')}.png`);
+  // [time, duration ms]: smooth count-up, a long hold, then a short fade before the loop restarts.
+  const plan = [];
+  for (let f = 0; f <= 3.6 * FPS; f++) plan.push([f / FPS, Math.round(1000 / FPS)]);
+  plan[plan.length - 1][1] = 3500; // hold the finished numbers
+  for (let f = Math.round(6.4 * FPS); f <= 7 * FPS; f++) plan.push([f / FPS, Math.round(1000 / FPS)]);
+  const args = ['-loop', '0', '-mixed', '-q', '90', '-m', '6'];
+  for (const [i, [t, d]] of plan.entries()) {
+    await ev(`frame(${t})`);
+    const file = join(tmp, `f${String(i).padStart(4, '0')}.png`);
     writeFileSync(file, await shot({ x: 0, y: 0, width: 1200, height: 470 }));
-    files.push(file);
+    args.push('-d', String(d), file);
   }
   const out = join(OUT, 'stats.webp');
-  // Hold the finished state longer: frame 70 (t≈4.7 s) is shown for 2.5 s.
-  const args = ['-loop', '0', '-lossy', '-q', '72', '-m', '4'];
-  files.forEach((file, i) => args.push('-d', String(i === 70 ? 2500 : Math.round(1000 / FPS)), file));
   execFileSync('img2webp', [...args, '-o', out], { stdio: 'ignore' });
   rmSync(tmp, { recursive: true, force: true });
-  console.log(`stats.webp  ${n} frames  ${Math.round(readFileSync(out).length / 1024)} KB`);
+  console.log(`stats.webp  ${plan.length} frames  ${Math.round(readFileSync(out).length / 1024)} KB`);
 }
 
 // 2. Architecture diagram → PNG (2× for sharpness)
 {
-  await send('Emulation.setDeviceMetricsOverride', { width: 1600, height: 900, deviceScaleFactor: 2, mobile: false });
+  await send('Emulation.setDeviceMetricsOverride', { width: 2400, height: 1000, deviceScaleFactor: 2, mobile: false });
   await send('Page.navigate', { url: `file://${join(HERE, 'architecture.html')}` });
   for (let i = 0; i < 60 && (await ev('document.body.dataset.ready')) !== '1'; i++) await sleep(250);
-  const h = await ev('Math.ceil(document.body.getBoundingClientRect().height)');
+  // Crop to the diagram's natural size, so it isn't padded out (which would shrink the text on screen).
+  const [w, h] = await ev('(() => { const r = document.body.getBoundingClientRect(); return [Math.ceil(r.width), Math.ceil(r.height)]; })()');
   const out = join(OUT, 'architecture.png');
-  writeFileSync(out, await shot({ x: 0, y: 0, width: 1600, height: h }, 1));
-  console.log(`architecture.png  1600×${h} @2x  ${Math.round(readFileSync(out).length / 1024)} KB`);
+  writeFileSync(out, await shot({ x: 0, y: 0, width: w, height: h }, 1));
+  console.log(`architecture.png  ${w}×${h} @2x  ${Math.round(readFileSync(out).length / 1024)} KB`);
 }
 chrome.kill();
 process.exit(0);

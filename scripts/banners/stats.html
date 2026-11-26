@@ -30,9 +30,8 @@ h1 { font-family: 'Russo One', sans-serif; font-weight: 400; font-size: 44px; ma
 <script>
 const ease = (x) => 1 - Math.pow(1 - Math.min(Math.max(x, 0), 1), 3);
 const cards = [...document.querySelectorAll('.card')];
-window.LOOP = 7; // seconds
+window.LOOP = 7; // seconds (count-up ends ≈3.5 s; fade-out 6.4–7 s)
 window.frame = (t) => {
-  document.getElementById('bg').style.backgroundPosition = `${-t * 22}px 0`;
   const head = document.getElementById('head');
   const out = ease((t - 6.4) / 0.6); // fade everything out before the loop restarts
   head.style.opacity = ease(t / 0.5) * (1 - out);

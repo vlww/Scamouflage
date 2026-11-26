@@ -144,10 +144,10 @@ def banner(title, kicker=None, height=150, hero=False, accent_first=None):
 # name: (title, kicker)
 README = {
     'readme-hero': ('Scamouflage', 'Spot scams before they spot you.'),
-    'readme-overview': ('Overview', 'What Scamouflage is'),
+    'readme-overview': ('Overview', 'The product'),
     'readme-try': ('Try it in 60 seconds', 'Start here'),
     'readme-problem': ('The problem', 'Why this matters'),
-    'readme-features': ('What it does', 'The product'),
+    'readme-features': ('What it does', 'Features'),
     'readme-hybrid': ('Hybrid inference', 'Firebase AI Logic'),
     'readme-speed': ('Built for speed', 'Gemini Nano, measured'),
     'readme-privacy': ('Private by design', 'Your data'),
@@ -159,10 +159,10 @@ README = {
 }
 DEVPOST = {
     'devpost-hero': ('Scamouflage', 'A private scam checker for the people scammers target most.'),
-    'devpost-overview': ('Overview', 'What Scamouflage is'),
+    'devpost-overview': ('Overview', 'The product'),
     'devpost-value': ('Value proposition', 'Why it’s worth installing'),
     'devpost-inspiration': ('Inspiration', 'Why I built it'),
-    'devpost-what': ('What it does', 'The product'),
+    'devpost-what': ('What it does', 'Features'),
     'devpost-ailogic': ('How I used Firebase AI Logic', 'Hybrid inference'),
     'devpost-how': ('How I built it', 'Engineering'),
     'devpost-design': ('Product design', 'Designing for a scared reader'),

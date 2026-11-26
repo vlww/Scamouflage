@@ -4,9 +4,9 @@
 <style>
 @font-face { font-family: 'Russo One'; src: url(../../node_modules/@fontsource/russo-one/files/russo-one-latin-400-normal.woff2) format('woff2'); }
 html, body { margin: 0; background: #11140d; }
-body { width: 1600px; padding: 36px 40px 36px; box-sizing: border-box; font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f6f1dc; }
-.kicker { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: #b5c98a; text-transform: uppercase; }
-h1 { font-family: 'Russo One', sans-serif; font-weight: 400; font-size: 38px; margin: 6px 0 22px; }
+body { width: max-content; padding: 36px 40px 36px; box-sizing: border-box; font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f6f1dc; }
+.kicker { font-size: 24px; font-weight: 700; letter-spacing: 2.5px; color: #b5c98a; text-transform: uppercase; }
+h1 { font-family: 'Russo One', sans-serif; font-weight: 400; font-size: 60px; margin: 8px 0 28px; }
 #out svg { max-width: none !important; }
 </style></head>
 <body>
@@ -18,10 +18,10 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.es
 mermaid.initialize({
   startOnLoad: false,
   theme: 'base',
-  flowchart: { curve: 'basis', nodeSpacing: 26, rankSpacing: 44, padding: 12 },
+  flowchart: { curve: 'basis', nodeSpacing: 30, rankSpacing: 40, padding: 14, wrappingWidth: 300 },
   themeVariables: {
     fontFamily: '-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
-    fontSize: '22px',
+    fontSize: '24px',
     background: '#11140d',
     primaryColor: '#1f2717', primaryTextColor: '#f6f1dc', primaryBorderColor: '#4b5a33',
     lineColor: '#8f9a74', edgeLabelBackground: '#11140d', tertiaryColor: '#11140d',
@@ -29,27 +29,25 @@ mermaid.initialize({
 });
 const def = `
 flowchart LR
-  IN["📨 Gmail email<br/>📋 Pasted text<br/>🖼️ Screenshot"]:::input
-  RECON["⚡ Recon rules<br/>~1 ms<br/>look-alike links, gift cards,<br/>urgency, secrecy"]:::local
-  CLEAN["✂️ Clean & shrink<br/>strip quotes & footers<br/>~1,800 chars, 1 link/domain"]:::local
+  IN["📨 Gmail email<br/>📋 Text · 🖼️ Screenshot<br/>(cleaned & shrunk)"]:::input
+  RECON["⚡ Quick rules, ~1 ms<br/>look-alike links, gift cards,<br/>pressure tactics"]:::local
   Q{"Gemini Nano<br/>ready?"}:::decide
-  DEV["🔒 ON-DEVICE<br/>InferenceMode.ONLY_ON_DEVICE<br/>full text never leaves"]:::device
-  RED["🛡️ Redact first<br/>emails, phones, cards,<br/>accounts, names, addresses"]:::redact
-  CLOUD["☁️ CLOUD<br/>PREFER_ON_DEVICE / ONLY_IN_CLOUD<br/>gemini-3.5-flash-lite"]:::cloud
-  RO["Quick-check answer<br/>+ 'Check with cloud help'"]:::local
-  UI["🛡️ Side panel + Gmail badge<br/>streamed verdict, route chip"]:::ui
+  DEV["🔒 ON YOUR COMPUTER<br/>ONLY_ON_DEVICE<br/>full text never leaves"]:::device
+  RED["🛡️ Personal details<br/>removed first"]:::redact
+  CLOUD["☁️ CLOUD<br/>gemini-3.5-flash-lite"]:::cloud
+  UI["🛡️ Side panel<br/>+ Gmail badge"]:::ui
   MORE["💬 Debrief chat<br/>🔁 Second opinion"]:::cloud
-  FAM[("👪 Firestore<br/>family warnings<br/>summary only")]:::store
+  FAM[("👪 Family<br/>summary only")]:::store
   IN --> RECON --> UI
-  IN --> CLEAN --> Q
+  IN --> Q
   Q -- yes --> DEV
-  Q -- "no, cloud help on" --> RED --> CLOUD
-  Q -- "no, private mode<br/>or automatic check" --> RO --> UI
-  DEV -. "cold start: race<br/>a redacted backup" .-> RED
-  DEV -- "stream + partial JSON" --> UI
-  CLOUD -- "stream + partial JSON" --> UI
+  Q -- "no" --> RED --> CLOUD
+  Q -. "private mode:<br/>quick rules only" .-> UI
+  DEV -. "still loading:<br/>cloud backup races it" .-> CLOUD
+  DEV -- "streams" --> UI
+  CLOUD -- "streams" --> UI
   UI -- "redacted" --> MORE
-  UI -- "Tell my family" --> FAM
+  UI --> FAM
   classDef input fill:#232a1b,stroke:#8f9a74,color:#f6f1dc
   classDef local fill:#1f2717,stroke:#4b5a33,color:#ece5cb
   classDef decide fill:#2c3520,stroke:#b5c98a,color:#f6f1dc
@@ -61,6 +59,9 @@ flowchart LR
 `;
 const { svg } = await mermaid.render('arch', def);
 document.getElementById('out').innerHTML = svg;
+const el = document.querySelector('#out svg');
+el.style.width = `${el.viewBox.baseVal.width}px`; // natural size: no scaling down
+el.removeAttribute('height');
 document.body.dataset.ready = '1';
 </script>
 </body></html>

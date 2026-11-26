@@ -8,6 +8,8 @@
   <a href="#testing-guide"><b>✅ Testing guide</b></a>
 </p>
 
+---
+
 <p align="center"><img src="docs/banners/readme-overview.svg" width="100%" alt="Overview"></p>
 
 ## Overview
@@ -16,7 +18,7 @@
 
 The checking happens **on your own computer**, using Gemini Nano, the AI model built into Chrome. If your computer can't run it, Scamouflage asks Gemini in the cloud for help instead, but only after it removes your personal details. Both routes go through **Firebase AI Logic hybrid inference**.
 
-It's made for the people scammers target most: **older adults, and the family members who look out for them.**
+It's made for the people scammers target most: **elderly people, and the family members who look out for them.**
 
 <p align="center">
   <img src="docs/screenshots/scam-light.png" width="270" alt="Side panel: Scam verdict, one-line reason, one action, warning signs">
@@ -38,11 +40,13 @@ It's made for the people scammers target most: **older adults, and the family me
 
 Scamouflage runs as a **Chrome extension** ([Chrome Web Store](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm)) and as a **web app** ([live demo](https://scamouflage-37a72.web.app)) that runs the same panel and the same AI engine. Built for **#BuildHybridAI 2026** (Web/Chrome track), starting Nov 23, 2026.
 
-<br>
+---
 
 <p align="center"><img src="docs/banners/readme-try.svg" width="100%" alt="Try it in 60 seconds"></p>
 
 ## Try it in 60 seconds
+
+There are three ways to try Scamouflage. The web demo is the fastest and needs no install. The Chrome extension is the full experience inside Gmail.
 
 | | How | What you'll see |
 |---|---|---|
@@ -52,7 +56,7 @@ Scamouflage runs as a **Chrome extension** ([Chrome Web Store](https://chromeweb
 
 Step-by-step instructions for judges are in the **[Testing guide](#testing-guide)**.
 
-<br>
+---
 
 <p align="center"><img src="docs/banners/readme-problem.svg" width="100%" alt="The problem"></p>
 
@@ -62,10 +66,10 @@ Step-by-step instructions for judges are in the **[Testing guide](#testing-guide
 
 Scams are growing fast, and older adults lose the most:
 
-- Americans **60 and over** reported **$7.75 billion** in losses to the FBI in 2025. That's **59% more** than the year before, more than any other age group, and **$38,500** per person on average. ([FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf), pp. 6 and 44)
-- **Phishing** was the most-reported crime of all, with **191,561** complaints. ([same report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf), p. 7)
+- Americans **60 and over** reported **$7.75 billion** in losses to the FBI in 2025. That's **59% more** than the year before, more than any other age group, and **$38,500** per person on average. ([FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf))
+- **Phishing** was the most-reported crime of all, with **191,561** complaints. ([same report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf))
 - The FTC logged **3 million** fraud reports and **$15.9 billion** in losses in 2025. ([FTC, Mar 25 2026](https://www.ftc.gov/news-events/news/press-releases/2026/03/ftc-testifies-joint-economic-committee-agencys-efforts-combat-fraud))
-- Most fraud is never reported. The FTC estimates the real cost to older adults in 2024 at **$10.1–81.5 billion**. ([FTC, *Protecting Older Consumers 2024–2025*](https://www.ftc.gov/system/files/ftc_gov/pdf/P144400-OlderAdultsReportDec2025.pdf), pp. 1–2)
+- Most fraud is never reported. The FTC estimates the real cost to older adults in 2024 at **$10.1–81.5 billion**. ([FTC, *Protecting Older Consumers 2024–2025*](https://www.ftc.gov/system/files/ftc_gov/pdf/P144400-OlderAdultsReportDec2025.pdf))
 
 The tools people have today don't fit the moment:
 
@@ -76,11 +80,13 @@ The tools people have today don't fit the moment:
 | General AI chatbots | You have to copy the message over, and you get paragraphs of "it depends" instead of a decision. |
 | **Scamouflage** | **Checks the email where you're reading it, privately, and gives you one clear answer.** |
 
-<br>
+---
 
 <p align="center"><img src="docs/banners/readme-features.svg" width="100%" alt="What it does"></p>
 
 ## What it does
+
+Scamouflage shows up in two places: a small badge inside Gmail, and a side panel that explains the result. Most of the time the badge is all you need. The panel is there when you want to know why, or what to do next.
 
 | Feature | What you get |
 |---|---|
@@ -99,7 +105,7 @@ The tools people have today don't fit the moment:
   <img src="docs/screenshots/inbox.png" width="700" alt="Inbox list where opened emails keep their Scam / Looks safe shield">
 </p>
 
-<br>
+---
 
 <p align="center"><img src="docs/banners/readme-hybrid.svg" width="100%" alt="Hybrid inference"></p>
 
@@ -114,7 +120,7 @@ Hybrid inference is what makes Scamouflage private. **Deciding where each check 
 | **Checking an email** (Nano ready) | 🔒 On your computer | `InferenceMode.ONLY_ON_DEVICE`, JSON schema via `onDeviceParams.promptOptions.responseConstraint`, `generateContentStream` | The full email can't reach the cloud, by design. |
 | **Checking an email** (no Nano) | ☁️ Cloud, after redaction | `PREFER_ON_DEVICE`, JSON schema via `inCloudParams.generationConfig.responseJsonSchema` | Works on any Chrome. Personal details are removed *before* the call. |
 | **Automatic check** (you opened an email) | 🔒 On your computer only | same as the first row | Opening an email never sends anything anywhere by itself. |
-| **Nano is still loading** | 🔒 + ☁️ raced | `ONLY_ON_DEVICE` and a redacted `ONLY_IN_CLOUD` backup, cancelled with an `AbortSignal` | Right after Chrome starts, Nano can take 20+ s. The first route to answer wins. |
+| **Nano is still loading** | 🔒 + ☁️ Both start at once, the first answer is used | `ONLY_ON_DEVICE` and a redacted `ONLY_IN_CLOUD` backup, cancelled with an `AbortSignal` | Right after Chrome starts, Nano can take 20+ seconds to load. The other check is cancelled. |
 | **Second opinion** | ☁️ Cloud, redacted | `ONLY_IN_CLOUD`, stricter prompt | Only offered when the on-device answer is unsure. |
 | **Screenshot** | 🔒 On your computer | `expectedInputs: [text, image]`, `inlineData` | Images can't be redacted, so they only go to the cloud if you allow it. |
 | **Debrief chat** | ☁️ Cloud, redacted | `startChat()` + `sendMessageStream` | Multi-turn chat isn't available on-device. |
@@ -124,13 +130,13 @@ Every result shows a **route chip** read from the SDK's `inferenceSource`: **�
 
 **Where it is in the code:** [`src/ai.js`](src/ai.js) imports `firebase/ai` and calls `getGenerativeModel` (line 39), `generateContentStream` (line 175), the on-device/cloud race in `scanEmail` (from line 217), and `startChat` / `sendMessageStream` (lines 423 and 436). [`src/firebase.js`](src/firebase.js) sets up `getAI` and App Check. The race is tested against a mocked SDK in [`test/routing.test.js`](test/routing.test.js).
 
-<br>
+---
 
 <p align="center"><img src="docs/banners/readme-speed.svg" width="100%" alt="Built for speed"></p>
 
 ## Built for speed
 
-My first prototype took about **9 seconds** to check an email on-device, with nothing on screen until the end. When I measured, starting the model took about 1 ms. **Almost all the time went into the words the model wrote.** So I made it write less, and show its answer sooner:
+The first version took about **9 seconds** to check an email on-device, and nothing showed up until the very end. Measuring showed that starting the model took about 1 ms. **Nearly all the time went into the words the model wrote**, so the fix was to have it write less and show its answer sooner:
 
 1. **A tiny answer format, verdict first:** `{ verdict, confidence, why, flags }`. The app works out the advice from the verdict, so the model writes about a third as much.
 2. **A smaller input:** quoted replies, signatures and legal footers are stripped, the body is capped at about 1,800 characters, and only one link per website is kept.
@@ -152,7 +158,7 @@ My first prototype took about **9 seconds** to check an email on-device, with no
 
 To see timings yourself, run `localStorage['scamouflage.debug']='1'` in the panel's console.
 
-<br>
+---
 
 <p align="center"><img src="docs/banners/readme-privacy.svg" width="100%" alt="Private by design"></p>
 
@@ -165,11 +171,13 @@ To see timings yourself, run `localStorage['scamouflage.debug']='1'` in the pane
 - **Family sharing stores a summary, not the email.** [`firestore.rules`](firestore.rules) enforces that, and only family members can read it.
 - **No ads, no analytics, nothing sold.** Full policy: **[scamouflage-37a72.web.app/privacy](https://scamouflage-37a72.web.app/privacy)**.
 
-<br>
+---
 
 <p align="center"><img src="docs/banners/readme-firebase.svg" width="100%" alt="The Firebase stack"></p>
 
 ## The Firebase stack
+
+Firebase AI Logic does all the AI work. The other Firebase products keep it secure, let it be tuned without a new release, and power family sharing.
 
 | Product | What it does in Scamouflage |
 |---|---|
@@ -180,13 +188,13 @@ To see timings yourself, run `localStorage['scamouflage.debug']='1'` in the pane
 | **Cloud Firestore** | Family groups and shared warnings, with rules that only let you add *yourself* to a family and check every field of a warning. |
 | **Hosting** | The web demo and landing page. |
 
-<br>
+---
 
 <p align="center"><img src="docs/banners/readme-accuracy.svg" width="100%" alt="Accuracy"></p>
 
 ## Accuracy
 
-I wrote 18 realistic, **invented** test messages ([`src/samples.js`](src/samples.js)): 11 scams (fake delivery fees, bank lockouts, gift-card "boss" requests, tech-support refunds, romance and crypto, changed invoice details, lottery wins, grandparent bail texts and more), 1 deliberately borderline sign-in alert, and 7 genuine messages, including a real security alert. `npm run eval` runs them through the exact prompt the product uses.
+The accuracy test uses 18 realistic, **made-up** messages ([`src/samples.js`](src/samples.js)): 11 scams (fake delivery fees, bank lockouts, gift-card "boss" requests, tech-support refunds, romance and crypto, changed invoice details, lottery wins, grandparent bail texts and more), 1 deliberately borderline sign-in alert, and 7 genuine messages, including a real security alert. `npm run eval` runs them through the exact prompt the product uses.
 
 | Route | Exact verdict | Scam vs. safe | Missed scams | False alarms | Speed |
 |---|---|---|---|---|---|
@@ -196,7 +204,7 @@ I wrote 18 realistic, **invented** test messages ([`src/samples.js`](src/samples
 
 Nano's one false alarm was a cautious "Be careful" on a genuine sign-in alert. The eval led to one prompt fix (a notice from a company's own website that only points you to its official app is safe), which halved Nano's false alarms. Eighteen messages is a smoke test, not a benchmark.
 
-<br>
+---
 
 <p align="center"><img src="docs/banners/readme-setup.svg" width="100%" alt="Run it yourself"></p>
 
@@ -235,7 +243,7 @@ Nano's one false alarm was a cautious "Be careful" on a genuine sign-in alert. T
 > The debug token is built into `dist/`. Never commit `.env.local`.
 </details>
 
-<br>
+---
 
 <p align="center"><img src="docs/banners/readme-judges.svg" width="100%" alt="Testing guide"></p>
 
@@ -257,7 +265,7 @@ Everything is free and needs no account. Any desktop Chrome works.
 3. Open Gmail and open any email. The shield appears next to the subject, and the panel shows the verdict. Go back to the inbox and the email keeps its label.
 4. **Watch hybrid inference switch:** set `chrome://flags/#optimization-guide-on-device-model` to **Disabled**, restart, and check again. The chip changes from **🔒 On-device** to **☁️ Cloud · N hidden**. Or the other way: with Nano on, turn off Wi-Fi, and checks keep working.
 
-<br>
+---
 
 <p align="center"><img src="docs/banners/readme-project.svg" width="100%" alt="Project facts"></p>
 
