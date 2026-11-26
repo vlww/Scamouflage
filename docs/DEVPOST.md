@@ -1,16 +1,11 @@
 <!--
-Devpost "About the project": paste everything below the line.
-Images load from GitHub (raw URLs), so push before pasting. Check the Devpost preview: if tables show as
-plain text with | pipes, tell me and I'll turn them into images.
+Final Devpost "About the project" text, as submitted. Images load from GitHub (raw URLs).
 Re-render visuals: python3 scripts/banners/make.py && node scripts/banners/render-gifs.mjs && node scripts/banners/render-visuals.mjs
-Elevator pitch field (≤200 chars): A Chrome extension that spots scam emails, texts and screenshots privately on your computer with Gemini Nano, using Firebase AI Logic hybrid inference for redacted cloud help.
 -->
-
----
 
 ![Scamouflage](https://raw.githubusercontent.com/vlww/Scamouflage/main/docs/banners/devpost-hero.gif)
 
-**🧩 [Add to Chrome](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm)** · **▶ [Live web demo](https://scamouflage-37a72.web.app)** · **💻 [Source code](https://github.com/vlww/Scamouflage)** · **✅ [Testing guide](https://github.com/vlww/Scamouflage#testing-guide)**
+### **🧩 [Add to Chrome](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm)**  ·  **▶️ [Live web demo](https://scamouflage-37a72.web.app)**  ·  **💻 [Source code](https://github.com/vlww/Scamouflage)**  ·  **✅ [Testing guide](https://github.com/vlww/Scamouflage#testing-guide)**
 
 ---
 
@@ -18,9 +13,9 @@ Elevator pitch field (≤200 chars): A Chrome extension that spots scam emails, 
 
 ## Overview
 
-**Scamouflage is a Chrome extension that checks your emails for scams, right inside Gmail.** When you open an email, a small shield appears next to the subject: **Scam**, **Be careful** or **Looks safe**. Click it and a side panel tells you why in one plain sentence, and what to do next. You can also paste in a text message or drop in a screenshot of one.
+**Scamouflage is a Chrome extension that checks your emails for scams, right inside Gmail.** When you open an email, a small shield appears next to the subject: **Scam**, **Be Careful** or **Looks Safe**. Click it and a side panel tells you why in one plain sentence, and what to do next. You can also paste in a text message or drop in a screenshot of one.
 
-The check runs **on your own computer** using Gemini Nano, the AI model that's built into Chrome. If your computer can't run it, Scamouflage asks Gemini in the cloud for help instead, but it removes your personal details first. **Firebase AI Logic hybrid inference** handles both.
+The check runs on your own computer using **Gemini Nano**, the AI model that's built into Chrome. If your computer can't run it, Scamouflage asks Gemini in the cloud for help instead, but it removes your personal details first. **Firebase AI Logic hybrid inference** handles both.
 
 It's made for the people scammers go after most: **elderly people, and the family members who look out for them.** It's available now on the **Chrome Web Store**, and there's also a **web app** version that runs the same panel in any browser tab.
 
@@ -64,7 +59,7 @@ The numbers are hard to ignore:
 
 - Americans **over 60** reported **$7.75 billion** in losses to the FBI in 2025. That's up **59%** from the year before, more than any other age group, and **$38,500** per person on average ([FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)).
 - **Phishing** was the most-reported crime of all, with 191,561 complaints ([FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)).
-- Most fraud never gets reported. The FTC estimates the real cost to older adults in 2024 was **$10.1–81.5 billion** ([FTC report](https://www.ftc.gov/system/files/ftc_gov/pdf/P144400-OlderAdultsReportDec2025.pdf)).
+- Most fraud never gets reported. It's estimated the real cost to older adults in 2024 was **$10.1–81.5 billion** ([FTC report](https://www.ftc.gov/system/files/ftc_gov/pdf/P144400-OlderAdultsReportDec2025.pdf)).
 
 None of the tools out there fit the moment. Spam filters miss scams written for one person. Scam-checker sites want you to upload your email. Chatbots give you paragraphs when you need a yes or no.
 
@@ -82,7 +77,7 @@ Scamouflage lives in two places: a small badge inside Gmail, and a side panel th
 
 | Feature | What you get |
 |---|---|
-| 🛡️ **Shield in Gmail** | Open an email and a badge appears next to the subject: *Checking… → Scam / Be careful / Looks safe*. |
+| 🛡️ **Shield in Gmail** | Open an email and a badge appears next to the subject: *Checking… → Scam / Be Careful / Looks Safe*. |
 | 💬 **One clear answer** | "**Scam.** Asks you to pay a fake delivery fee. *Don't click, reply, or pay. Delete it.*" |
 | 🔍 **Proof you can see** | Tap a warning sign: *Says harborviewbank.com · Really goes to harborview-verify.top*. The fake link lights up in the email. |
 | 📥 **Inbox labels** | Emails you've opened keep their result in your inbox list. |
@@ -115,7 +110,7 @@ In Scamouflage, hybrid inference isn't just a backup plan. **Deciding where each
 | On-device answer isn't sure | ☁️ Second opinion, personal details removed | `ONLY_IN_CLOUD` with a stricter prompt |
 | Screenshot | 🔒 On your computer | `expectedInputs: [text, image]` + `inlineData` |
 | "I already clicked" chat | ☁️ Cloud, personal details removed | `startChat` + `sendMessageStream` |
-| Setting up Gemini Nano for the first time | 🔒 On your computer: Chrome downloads the model once and keeps it | `initializeDeviceModel`, with a progress bar during setup |
+| Setting up Gemini Nano for the first time | 🔒 On your computer | `initializeDeviceModel`, with a progress bar during setup |
 
 A few choices made all the difference:
 
@@ -138,7 +133,7 @@ Scamouflage is a Chrome extension (Manifest V3) with a side panel, a background 
 - The answer format was cut down to the essentials, verdict first: `{ verdict, confidence, why, flags }`. The app writes the advice itself, so the model writes about a third as much.
 - Emails are cleaned up before they're checked: quoted replies, signatures and footers are removed, and only one link per website is kept.
 - The answer is **streamed** and read as it's written, so the verdict appears the moment it's ready.
-- The model is warmed up properly when the panel opens. Creating a session doesn't load it, but a one-word prompt does.
+- The model is warmed up when the panel opens. Creating a session doesn't load it, but a one-word prompt does.
 
 | Measured on-device | Before | After |
 |---|---|---|
@@ -149,16 +144,16 @@ Scamouflage is a Chrome extension (Manifest V3) with a side panel, a background 
 
 **Removing personal details without losing the clues.** Before anything goes to the cloud, email addresses, phone numbers, card and account numbers, Social Security numbers, codes, names and street addresses are removed. What's kept is what gives a scam away: the sender's website, where links really go, amounts and wording.
 
-**A quick first look.** Simple rules check for look-alike websites, links that don't go where they say, gift-card requests and pressure tactics in about **1 ms**, before the AI answers. They can only ever say "Be careful?". Only the AI can call something a scam.
+**A quick first look.** Simple rules check for look-alike websites, links that don't go where they say, gift-card requests and pressure tactics in about **1 ms**, before the AI answers. Then, the AI determines whether something is actually a scam.
 
-**Testing accuracy.** 18 realistic, made-up messages (11 scams, 7 genuine and 1 borderline) were run through the exact prompt the app uses:
+**Testing accuracy.** 18 realistic messages were run through the exact prompt the app uses:
 
 | Route | Exact verdict | Scam vs. safe | Missed scams |
 |---|---|---|---|
 | On-device Gemini Nano | 16/18 | 17/18 | **0** |
 | Cloud, personal details removed | 17/18 | 18/18 | **0** |
 
-The test showed Nano flagging some real security notices as suspicious. One change to the prompt cut those false alarms in half.
+The test showed Nano flagging some real security notices as suspicious. Adjusting the prompt halved those false alarms.
 
 **The rest of the Firebase stack** keeps it secure, tunable and social:
 
@@ -178,16 +173,18 @@ On top of that, there are 79 automated tests, code linting, and a script that ch
 
 ## Product design
 
-Every design choice started with one person: an elderly reader, worried about their bank account, using a laptop with the text zoomed in.
+Every design choice started with the target audience of elderly people, who are most likely to fall victim to email scams. Imagine a grandparent, worried about their bank account, using a laptop with the text zoomed in.
+
+However, this tool can be used by anyone! It helps to have a second pair of eyes whenever you aren't sure if an email is legitimate, or if a link might be safe to click. In fact, I've been using Scamouflage myself since I've developed it!
 
 ![Dark mode, Looks safe verdict](https://raw.githubusercontent.com/vlww/Scamouflage/main/store/out/screenshot-4.png)
 
-- **The answer comes first.** One word (**Scam**, **Be careful** or **Looks safe**), then one line explaining why, then one thing to do.
-- **Never color alone.** Every result has a word, an icon and a color, and the contrast is checked automatically in light and dark mode.
+- **The answer comes first.** One word (**Scam**, **Be Careful** or **Looks Safe**), then one line explaining why, then one thing to do.
+- **Visual results.** Every result has a word, an icon and a color, and the contrast is checked automatically.
 - **Easy to read.** There's a text-size slider, plus keyboard and screen-reader support.
-- **Kind, never blaming.** The "I already clicked" chat is written for someone who feels embarrassed. It starts with what to do right now.
+- **Respectful to the user.** The "I already clicked" chat helps address mistakes, starting with what to do right now.
 - **Honest about privacy.** Every result shows where the check ran and how many personal details were hidden.
-- **No false alarms in the inbox.** Inbox labels only appear on emails that were fully checked by the AI. A quick-rule guess is never shown as "Scam".
+- **No false alarms in the inbox.** Inbox labels only appear on emails that were fully checked by the model.
 - **A complete product.** There's a setup guide that downloads the on-device model, settings, family sharing, a privacy policy, a landing page and a Chrome Web Store listing.
 
 The web app puts the real panel right on the landing page, so anyone can try it without installing anything:
@@ -200,8 +197,8 @@ The web app puts the real panel right on the landing page, so anyone can try it 
 
 ## Potential impact
 
-- **A real problem that's getting worse.** Americans over 60 lost $7.75 billion in 2025, and phishing is the most-reported crime of all.
-- **A specific audience.** Elderly people who read Gmail on a computer, and the grown children who worry about them. Family sharing is built for that relationship: one tap from a parent puts the warning on their child's screen before any money moves.
+- **A real problem that's getting worse.** Americans over 60 lost $7.75 billion in 2025, and phishing is the most-reported crime of all, let alone other types of email scams.
+- **A specific audience.** Elderly people who read Gmail on a computer, and the grown children who worry about them. Family sharing is built for that relationship: one tap from a parent sends the warning to a trusted family member.
 - **The right moment.** Scams work in the minute between opening a message and acting on it. Scamouflage answers inside that minute, before the click.
 - **Privacy is why people say no.** People won't hand their inbox to a stranger. With checks on their own computer, they don't have to. And because the cloud can step in, it still works on computers that can't run Nano.
 - **Free to run.** Checks on your computer cost nothing, so it can stay free.
@@ -217,7 +214,6 @@ The web app puts the real panel right on the landing page, so anyone can try it 
 - **The SDK's fallback behavior.** `PREFER_ON_DEVICE` doesn't switch to the cloud if the on-device check fails halfway through. So each request picks its mode explicitly, and the retry and backup logic was built and tested separately.
 - **Gmail keeps changing.** Gmail redraws its page constantly. The badge has backup ways of finding the email, keeps its own styling so Gmail can't break it, and puts itself back whenever Gmail redraws.
 - **App Check inside an extension.** reCAPTCHA can't run in extensions, so the extension uses a debug token while the web app uses reCAPTCHA Enterprise. A build check makes sure the token never ends up on the website.
-- **Writing for a scared reader.** The hardest editing was cutting every sentence that didn't help someone decide what to do.
 
 ---
 
@@ -225,12 +221,11 @@ The web app puts the real panel right on the landing page, so anyone can try it 
 
 ## Accomplishments
 
-- **Shipped in a week.** From a first idea on November 23 to a published **Chrome Web Store** extension and a live web app, with family sharing and a privacy policy.
-- **10× faster first answer:** from about 9 seconds to under 1, measured.
-- **0 missed scams** in testing, both on-device and in the cloud.
-- **Private by design:** the full email has no way to reach the cloud.
+- **Shipped in a week.** During the hackathon, I not only completely built this project, but I was able to get it published as a **[Chrome Web Store](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm)** extension and a [live web app](https://scamouflage-37a72.web.app/), with family sharing and a privacy policy.
+- **10x faster first answer:** throughout building Scamouflage, I got the model to determine the result in under 1 second, which was significantly faster than the 20 seconds it initially took.
+- **0 missed scams** in testing, both on-device and in the cloud. When using the Chrome extension myself, I found that it was very accurate in correctly determining the legitimacy of emails.
+- **Private by design:** the full email has no way to reach the cloud, protecting the user's data.
 - **No more waiting on slow starts,** without giving up privacy, and with tests to prove it works.
-- **Easy to read:** high-contrast colors in both themes, checked by a script.
 
 ---
 
@@ -239,7 +234,7 @@ The web app puts the real panel right on the landing page, so anyone can try it 
 ## What I learned
 
 - **Measure before you optimize.** I assumed loading the model was the slow part. It was actually how much the model wrote. With on-device AI, a shorter answer means a faster answer.
-- **Small models do best with small, clear jobs.** A tight set of rules and a short answer format made Nano faster *and* more accurate.
+- **Small models do best with clear jobs.** A tight set of rules and short answer format made Nano faster *and* more accurate.
 - **Hybrid inference is a product decision.** Deciding which requests can leave the computer, and in what form, shaped the whole app: the On-device/Cloud chip, the "4 hidden" count, and the rule that automatic checks stay local.
 - **Even a small test set helps.** Eighteen messages were enough to catch false alarms I'd never have noticed by hand.
 
@@ -250,7 +245,6 @@ The web app puts the real panel right on the landing page, so anyone can try it 
 ## What's next
 
 - **More email apps:** Outlook and Yahoo on the web.
-- **A weekly family summary:** "here's what Scamouflage caught this week", for whoever looks out for a parent.
 - **More languages,** since scams target every community.
 - **Android,** using Gemini Nano through Firebase AI Logic, so text messages get the same private check.
 - **A bigger public test set,** ideally built with consumer-protection groups.
