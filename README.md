@@ -168,7 +168,7 @@ To see timings yourself, run `localStorage['scamouflage.debug']='1'` in the pane
 - **Automatic checks never use the cloud.** The cloud only helps when you press a button, and you can switch it off in **Settings → Cloud help**.
 - **The Gmail script never goes online.** It reads the open email and only talks to the extension.
 - **Family sharing stores a summary, not the email.** [`firestore.rules`](firestore.rules) enforces that, and only family members can read it.
-- **No ads, no analytics, nothing sold.** Full policy: **[scamouflage-37a72.web.app/privacy](https://scamouflage-37a72.web.app/privacy)**.
+- **No ads, no analytics, nothing sold.** Full policy: **[scamouflage.xyz/privacy](https://scamouflage-37a72.web.app/privacy)**.
 
 ---
 
@@ -250,7 +250,7 @@ Nano's one false alarm was a cautious "Be careful" on a genuine sign-in alert. T
 
 Everything is free and needs no account. Any desktop Chrome works.
 
-**Option A: no install (2 minutes).** Open **[scamouflage-37a72.web.app](https://scamouflage-37a72.web.app)**.
+**Option A: no install (2 minutes).** Open **[scamouflage.xyz](https://scamouflage-37a72.web.app)**.
 1. In the live demo, tap a sample (**Delivery fee**, **Bank lock**, **Boss gift cards**, **Tech support**, **Grandkid in trouble**, **Store receipt**) and press **Check for scams**.
 2. Tap a warning sign to see the proof. Tap the route chip to see where the check ran.
 3. Tap **What should I do?** to try the Debrief chat.
