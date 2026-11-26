@@ -2,11 +2,11 @@
   <img src="docs/banners/readme-hero.svg" width="100%" alt="Scamouflage: spot scams before they spot you">
 </p>
 
-<p align="center">
-  <a href="https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm"><b>🧩 Add to Chrome</b></a> &nbsp;·&nbsp;
-  <a href="https://scamouflage-37a72.web.app"><b>▶️ Live web demo</b></a> &nbsp;·&nbsp;
-  <a href="#testing-guide"><b>✅ Testing guide</b></a>
-</p>
+<h3 align="center">
+  <a href="https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm">🧩 Add to Chrome</a> &nbsp;·&nbsp;
+  <a href="https://scamouflage-37a72.web.app">▶️ Live web demo</a> &nbsp;·&nbsp;
+  <a href="#testing-guide">✅ Testing guide</a>
+</h3>
 
 ---
 
