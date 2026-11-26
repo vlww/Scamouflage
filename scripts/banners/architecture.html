@@ -10,8 +10,12 @@ h1 { font-family: 'Russo One', sans-serif; font-weight: 400; font-size: 60px; ma
 #out svg { max-width: none !important; }
 </style></head>
 <body>
-<div class="kicker">Firebase AI Logic hybrid inference</div>
-<h1>How a message gets checked</h1>
+<div class="kicker" id="k">Firebase AI Logic hybrid inference</div>
+<h1 id="t">How a message gets checked</h1>
+<script>
+  // ?bare=1: diagram only (no heading), for the Devpost gallery.
+  if (new URLSearchParams(location.search).get('bare')) { document.getElementById('k').hidden = true; document.getElementById('t').hidden = true; }
+</script>
 <div id="out"></div>
 <script type="module">
 import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';

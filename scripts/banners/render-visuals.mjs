@@ -21,9 +21,11 @@ const send = (method, params = {}) => new Promise((r) => { const i = ++id; pendi
 const ev = async (expression) => (await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result?.result?.value;
 const shot = async (clip, scale = 1) => Buffer.from((await send('Page.captureScreenshot', { format: 'png', clip: { ...clip, scale } })).result.data, 'base64');
 
+const ONLY = process.argv[2]; // 'arch' re-renders only the diagrams (skips the slow WebP)
+
 // 1. Animated stats card → WebP. Rendered at 2× and encoded lossless, so text stays crisp; the
 //    background is static, so only the changing numbers cost bytes. The finished state is held.
-{
+if (ONLY !== 'arch') {
   await send('Emulation.setDeviceMetricsOverride', { width: 1200, height: 470, deviceScaleFactor: 2, mobile: false });
   await send('Page.navigate', { url: `file://${join(HERE, 'stats.html')}` });
   await sleep(800);
@@ -49,16 +51,16 @@ const shot = async (clip, scale = 1) => Buffer.from((await send('Page.captureScr
   console.log(`stats.webp  ${plan.length} frames  ${Math.round(readFileSync(out).length / 1024)} KB`);
 }
 
-// 2. Architecture diagram → PNG (2× for sharpness)
-{
+// 2. Architecture diagram → PNG (2× for sharpness), with its heading and without (for the gallery)
+for (const [query, name] of [['', 'architecture.png'], ['?bare=1', 'architecture-bare.png']]) {
   await send('Emulation.setDeviceMetricsOverride', { width: 2400, height: 1000, deviceScaleFactor: 2, mobile: false });
-  await send('Page.navigate', { url: `file://${join(HERE, 'architecture.html')}` });
+  await send('Page.navigate', { url: `file://${join(HERE, 'architecture.html')}${query}` });
   for (let i = 0; i < 60 && (await ev('document.body.dataset.ready')) !== '1'; i++) await sleep(250);
   // Crop to the diagram's natural size, so it isn't padded out (which would shrink the text on screen).
   const [w, h] = await ev('(() => { const r = document.body.getBoundingClientRect(); return [Math.ceil(r.width), Math.ceil(r.height)]; })()');
-  const out = join(OUT, 'architecture.png');
+  const out = join(OUT, name);
   writeFileSync(out, await shot({ x: 0, y: 0, width: w, height: h }, 1));
-  console.log(`architecture.png  ${w}×${h} @2x  ${Math.round(readFileSync(out).length / 1024)} KB`);
+  console.log(`${name}  ${w}×${h} @2x  ${Math.round(readFileSync(out).length / 1024)} KB`);
 }
 chrome.kill();
 process.exit(0);

@@ -1,0 +1,92 @@
+<!doctype html>
+<!-- Devpost thumbnail + image gallery (3:2, 1500×1000). Rendered by store/render-gallery.sh into store/gallery/.
+     ?s=thumb  thumbnail · ?s=1..8  gallery images -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face { font-family: 'Russo One'; src: url(../node_modules/@fontsource/russo-one/files/russo-one-latin-400-normal.woff2) format('woff2'); }
+  html, body { margin: 0; width: 1500px; height: 1000px; overflow: hidden; background: #11140d; }
+  body { font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f6f1dc; }
+  .camo { position: absolute; inset: 0; background: url(../docs/banners/camo-tile.svg) repeat; background-size: 840px 420px; }
+  .camo::after { content: ''; position: absolute; inset: 0; background: var(--scrim, linear-gradient(100deg, rgb(11 14 8 / 0.90), rgb(11 14 8 / 0.70) 55%, rgb(11 14 8 / 0.45))); }
+  .root { position: absolute; inset: 0; }
+  .wordmark { font-family: 'Russo One', sans-serif; color: #f6f1dc; white-space: nowrap; }
+  .wordmark span { color: #d8c99a; }
+
+  /* Thumbnail */
+  .thumb { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 48px; padding-right: 30px; }
+  .thumb img { width: 250px; height: 250px; filter: drop-shadow(0 10px 30px rgb(0 0 0 / 0.55)); }
+  .thumb .wordmark { font-size: 136px; letter-spacing: 1px; text-shadow: 0 6px 24px rgb(0 0 0 / 0.5); }
+
+  /* Gallery: side-by-side (text left, panel screenshot right) */
+  .side { position: absolute; inset: 0; display: grid; grid-template-columns: 600px 1fr; gap: 56px; padding: 0 80px; align-items: center; }
+  /* Gallery: stacked (title on top, wide image below) */
+  .stack { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 44px; padding: 0 80px; }
+  .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 30px; }
+  .brand img { width: 54px; height: 54px; }
+  .brand .wordmark { font-size: 36px; }
+  .stack .brand { margin-bottom: 18px; }
+  h1 { font-family: 'Russo One', sans-serif; font-weight: 400; font-size: 64px; line-height: 1.08; margin: 0 0 24px; }
+  .stack h1 { font-size: 58px; margin: 0 0 12px; }
+  p.sub { font-size: 29px; line-height: 1.45; color: #d9d2b8; margin: 0; }
+  ul { list-style: none; padding: 0; margin: 30px 0 0; display: grid; gap: 14px; font-size: 25px; color: #ece5cb; }
+  li { display: flex; gap: 14px; align-items: center; }
+  li::before { content: ''; width: 12px; height: 12px; border-radius: 50%; background: #b5c98a; flex: none; }
+  .frame { border-radius: 22px; overflow: hidden; box-shadow: 0 30px 70px rgb(0 0 0 / 0.6), 0 0 0 2px rgb(255 255 255 / 0.08); background: #fff; }
+  .frame img { display: block; }
+  .art { display: grid; place-items: center; }
+  .panel img { width: 500px; }
+  .panel { max-height: 860px; }
+  .wide { align-self: center; }
+
+  /* Speed card */
+  .speed { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .tile { background: rgb(38 58 26 / 0.55); border: 2px solid rgb(181 201 138 / 0.35); border-radius: 24px; padding: 40px 44px; }
+  .tile .k { font-size: 22px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: #b5c98a; }
+  .tile .n { font-family: 'Russo One', sans-serif; font-size: 108px; line-height: 1.05; margin: 14px 0 10px; }
+  .tile .n.before { color: #a8a189; }
+  .tile .n.after { color: #f6f1dc; }
+  .tile .d { font-size: 26px; color: #d9d2b8; line-height: 1.4; }
+</style>
+</head>
+<body>
+<div class="camo"></div>
+<div class="root" id="root"></div>
+<script>
+const q = new URLSearchParams(location.search);
+const S = '../docs/screenshots/';
+const B = '../docs/banners/';
+const logo = '../public/icons/icon128.png';
+const brand = `<div class="brand"><img src="${logo}" alt=""><span class="wordmark">Scam<span>ouflage</span></span></div>`;
+const list = (xs) => `<ul>${xs.map((x) => `<li>${x}</li>`).join('')}</ul>`;
+const side = (h, sub, pts, img) => `<div class="side"><div>${brand}<h1>${h}</h1><p class="sub">${sub}</p>${list(pts)}</div>
+  <div class="art"><div class="frame panel"><img src="${img}" alt=""></div></div></div>`;
+const stack = (h, sub, body) => `<div class="stack"><div>${brand}<h1>${h}</h1><p class="sub">${sub}</p></div>${body}</div>`;
+const SLIDES = {
+  thumb: () => `<div class="thumb"><img src="${logo}" alt=""><span class="wordmark">Scam<span>ouflage</span></span></div>`,
+  1: () => side('Know a scam when you see it.', 'One clear verdict, one reason in plain words, and one thing to do next.',
+    ['Checked on your own computer', 'Tap a warning sign to see the proof', 'Help if you already clicked or paid'], S + 'scam-light-short.png'),
+  2: () => stack('A shield right in your Gmail.', 'Open an email and Scamouflage checks it, usually in under a second.',
+    `<div class="frame wide"><img src="${S}gmail-badge.png" style="width:1100px" alt=""></div>`),
+  3: () => stack('See which emails are safe at a glance.', 'Emails you’ve opened and checked keep their label in your inbox.',
+    `<div class="frame wide" style="width:1340px"><img src="${S}inbox.png" style="width:1700px;max-width:none" alt=""></div>`),
+  4: () => side('Calm when it’s safe.', 'Real mail gets a clear “Looks safe”, in light or dark mode, at any text size.',
+    ['A word, an icon and a color for every result', 'High-contrast colors, checked by a script', 'Keyboard and screen-reader support'], S + 'safe-dark.png'),
+  5: () => stack('Private by design.', 'Gemini Nano checks on your computer. The cloud only helps after personal details are removed.',
+    `<img src="${B}architecture-bare.png" style="width:1340px;border-radius:18px;box-shadow:0 30px 70px rgb(0 0 0 / 0.6)" alt="">`),
+  6: () => stack('10× faster first answer.', 'Measured on-device with Gemini Nano, from the first version to today.',
+    `<div class="speed">
+      <div class="tile"><div class="k">First version</div><div class="n before">~9 s</div><div class="d">until anything appeared on screen</div></div>
+      <div class="tile"><div class="k">Now</div><div class="n after">0.77 s</div><div class="d">until the verdict is on screen, streamed as it’s written</div></div>
+    </div>`),
+  7: () => stack('Scams are costing people billions.', 'Americans over 60 lose the most, and phishing is the most-reported crime.',
+    `<img src="${B}stats-still.png" style="width:1340px;border-radius:18px;box-shadow:0 30px 70px rgb(0 0 0 / 0.6)" alt="">`),
+  8: () => stack('Try it without installing.', 'The web app runs the real panel right on the landing page.',
+    `<div class="frame wide" style="width:1040px;align-self:center"><img src="${S}web-demo.png" style="width:1040px" alt=""></div>`),
+};
+document.getElementById('root').innerHTML = (SLIDES[q.get('s') || 'thumb'] || SLIDES.thumb)();
+if (q.get('s') === 'thumb') document.documentElement.style.setProperty('--scrim', 'linear-gradient(180deg, rgb(11 14 8 / 0.55), rgb(11 14 8 / 0.70))');
+</script>
+</body>
+</html>

@@ -48,5 +48,10 @@ window.frame = (t) => {
   });
 };
 frame(5);
+// ?bare=1: cards only (no heading), for the Devpost gallery still.
+if (new URLSearchParams(location.search).get('bare')) {
+  document.getElementById('head').style.display = 'none';
+  document.querySelector('.wrap').style.justifyContent = 'center';
+}
 </script>
 </body></html>
