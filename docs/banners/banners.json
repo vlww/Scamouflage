@@ -3,6 +3,10 @@
   "height": 280,
   "loop": 20.0
  },
+ "readme-overview": {
+  "height": 150,
+  "loop": 20.0
+ },
  "readme-try": {
   "height": 150,
   "loop": 20.0
@@ -51,6 +55,10 @@
   "height": 280,
   "loop": 20.0
  },
+ "devpost-overview": {
+  "height": 150,
+  "loop": 20.0
+ },
  "devpost-value": {
   "height": 150,
   "loop": 20.0
@@ -92,10 +100,6 @@
   "loop": 20.0
  },
  "devpost-next": {
-  "height": 150,
-  "loop": 20.0
- },
- "devpost-hackathon": {
   "height": 150,
   "loop": 20.0
  }

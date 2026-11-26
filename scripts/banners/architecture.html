@@ -1,0 +1,66 @@
+<!doctype html>
+<!-- Landscape architecture diagram (docs/banners/architecture.png), rendered by render-visuals.mjs. -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: 'Russo One'; src: url(../../node_modules/@fontsource/russo-one/files/russo-one-latin-400-normal.woff2) format('woff2'); }
+html, body { margin: 0; background: #11140d; }
+body { width: 1600px; padding: 36px 40px 36px; box-sizing: border-box; font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f6f1dc; }
+.kicker { font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: #b5c98a; text-transform: uppercase; }
+h1 { font-family: 'Russo One', sans-serif; font-weight: 400; font-size: 38px; margin: 6px 0 22px; }
+#out svg { max-width: none !important; }
+</style></head>
+<body>
+<div class="kicker">Firebase AI Logic hybrid inference</div>
+<h1>How a message gets checked</h1>
+<div id="out"></div>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  flowchart: { curve: 'basis', nodeSpacing: 26, rankSpacing: 44, padding: 12 },
+  themeVariables: {
+    fontFamily: '-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
+    fontSize: '22px',
+    background: '#11140d',
+    primaryColor: '#1f2717', primaryTextColor: '#f6f1dc', primaryBorderColor: '#4b5a33',
+    lineColor: '#8f9a74', edgeLabelBackground: '#11140d', tertiaryColor: '#11140d',
+  },
+});
+const def = `
+flowchart LR
+  IN["📨 Gmail email<br/>📋 Pasted text<br/>🖼️ Screenshot"]:::input
+  RECON["⚡ Recon rules<br/>~1 ms<br/>look-alike links, gift cards,<br/>urgency, secrecy"]:::local
+  CLEAN["✂️ Clean & shrink<br/>strip quotes & footers<br/>~1,800 chars, 1 link/domain"]:::local
+  Q{"Gemini Nano<br/>ready?"}:::decide
+  DEV["🔒 ON-DEVICE<br/>InferenceMode.ONLY_ON_DEVICE<br/>full text never leaves"]:::device
+  RED["🛡️ Redact first<br/>emails, phones, cards,<br/>accounts, names, addresses"]:::redact
+  CLOUD["☁️ CLOUD<br/>PREFER_ON_DEVICE / ONLY_IN_CLOUD<br/>gemini-3.5-flash-lite"]:::cloud
+  RO["Quick-check answer<br/>+ 'Check with cloud help'"]:::local
+  UI["🛡️ Side panel + Gmail badge<br/>streamed verdict, route chip"]:::ui
+  MORE["💬 Debrief chat<br/>🔁 Second opinion"]:::cloud
+  FAM[("👪 Firestore<br/>family warnings<br/>summary only")]:::store
+  IN --> RECON --> UI
+  IN --> CLEAN --> Q
+  Q -- yes --> DEV
+  Q -- "no, cloud help on" --> RED --> CLOUD
+  Q -- "no, private mode<br/>or automatic check" --> RO --> UI
+  DEV -. "cold start: race<br/>a redacted backup" .-> RED
+  DEV -- "stream + partial JSON" --> UI
+  CLOUD -- "stream + partial JSON" --> UI
+  UI -- "redacted" --> MORE
+  UI -- "Tell my family" --> FAM
+  classDef input fill:#232a1b,stroke:#8f9a74,color:#f6f1dc
+  classDef local fill:#1f2717,stroke:#4b5a33,color:#ece5cb
+  classDef decide fill:#2c3520,stroke:#b5c98a,color:#f6f1dc
+  classDef device fill:#173a1c,stroke:#7fd18a,color:#e6f8e3,stroke-width:2.5px
+  classDef redact fill:#3b2f12,stroke:#e3b55a,color:#fbefd2,stroke-width:2px
+  classDef cloud fill:#16283a,stroke:#7fb2e3,color:#e3f0fb,stroke-width:2px
+  classDef ui fill:#2e3a1e,stroke:#b5c98a,color:#f6f1dc,stroke-width:2.5px
+  classDef store fill:#2a2232,stroke:#b39ad6,color:#efe6fa
+`;
+const { svg } = await mermaid.render('arch', def);
+document.getElementById('out').innerHTML = svg;
+document.body.dataset.ready = '1';
+</script>
+</body></html>

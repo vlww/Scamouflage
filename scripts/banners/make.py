@@ -144,6 +144,7 @@ def banner(title, kicker=None, height=150, hero=False, accent_first=None):
 # name: (title, kicker)
 README = {
     'readme-hero': ('Scamouflage', 'Spot scams before they spot you.'),
+    'readme-overview': ('Overview', 'What Scamouflage is'),
     'readme-try': ('Try it in 60 seconds', 'Start here'),
     'readme-problem': ('The problem', 'Why this matters'),
     'readme-features': ('What it does', 'The product'),
@@ -154,26 +155,28 @@ README = {
     'readme-accuracy': ('Accuracy', 'Evaluation'),
     'readme-setup': ('Run it yourself', 'Setup'),
     'readme-judges': ('Testing guide', 'For judges'),
-    'readme-project': ('Project facts', 'Hackathon, credits & license'),
+    'readme-project': ('Project facts', 'Layout, credits & license'),
 }
 DEVPOST = {
     'devpost-hero': ('Scamouflage', 'A private scam checker for the people scammers target most.'),
-    'devpost-value': ('Value proposition', 'In one paragraph'),
+    'devpost-overview': ('Overview', 'What Scamouflage is'),
+    'devpost-value': ('Value proposition', 'Why it’s worth installing'),
     'devpost-inspiration': ('Inspiration', 'Why I built it'),
     'devpost-what': ('What it does', 'The product'),
     'devpost-ailogic': ('How I used Firebase AI Logic', 'Hybrid inference'),
     'devpost-how': ('How I built it', 'Engineering'),
-    'devpost-design': ('Designing for a scared reader', 'Product design'),
+    'devpost-design': ('Product design', 'Designing for a scared reader'),
     'devpost-impact': ('Potential impact', 'Real problem, real audience'),
     'devpost-challenges': ('Challenges', 'What fought back'),
     'devpost-accomplishments': ('Accomplishments', 'What I’m proud of'),
     'devpost-learned': ('What I learned', 'Takeaways'),
     'devpost-next': ("What's next", 'Roadmap'),
-    'devpost-hackathon': ('Built during the hackathon', 'Disclosure'),
 }
 
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
+    with open(os.path.join(OUT, 'camo-tile.svg'), 'w') as f:  # reused by render-visuals.mjs
+        f.write(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W_TILE}" height="{H_TILE}">{camo_tile()}</svg>')
     meta = {}
     for name, (title, kicker) in {**README, **DEVPOST}.items():
         hero = name.endswith('-hero')
