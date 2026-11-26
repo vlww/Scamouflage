@@ -123,7 +123,7 @@ Hybrid inference is what makes Scamouflage private. **Deciding where each check 
 | **Second opinion** | ☁️ Cloud, redacted | `ONLY_IN_CLOUD`, stricter prompt | Only offered when the on-device answer is unsure. |
 | **Screenshot** | 🔒 On your computer | `expectedInputs: [text, image]`, `inlineData` | Images can't be redacted, so they only go to the cloud if you allow it. |
 | **Debrief chat** | ☁️ Cloud, redacted | `startChat()` + `sendMessageStream` | Multi-turn chat isn't available on-device. |
-| **Model download** | 🔒 | `initializeDeviceModel` with a progress bar | Started from a button in onboarding. |
+| **Model download** | 🔒 On your computer: Chrome downloads Gemini Nano once and keeps it | `initializeDeviceModel` with a progress bar | Started from a button during setup, so the first check is fast. |
 
 Every result shows a **route chip** read from the SDK's `inferenceSource`: **🔒 On-device**, or **☁️ Cloud · 4 hidden** (how many personal details were removed). What you see is what actually ran.
 

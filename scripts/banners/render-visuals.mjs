@@ -27,7 +27,7 @@ const shot = async (clip, scale = 1) => Buffer.from((await send('Page.captureScr
   await send('Emulation.setDeviceMetricsOverride', { width: 1200, height: 470, deviceScaleFactor: 2, mobile: false });
   await send('Page.navigate', { url: `file://${join(HERE, 'stats.html')}` });
   await sleep(800);
-  const FPS = 24;
+  const FPS = 50;
   const tmp = join(tmpdir(), 'stats-frames');
   rmSync(tmp, { recursive: true, force: true });
   mkdirSync(tmp);

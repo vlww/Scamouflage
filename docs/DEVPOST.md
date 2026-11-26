@@ -115,7 +115,7 @@ In Scamouflage, hybrid inference isn't just a backup plan. **Deciding where each
 | On-device answer isn't sure | ☁️ Second opinion, personal details removed | `ONLY_IN_CLOUD` with a stricter prompt |
 | Screenshot | 🔒 On your computer | `expectedInputs: [text, image]` + `inlineData` |
 | "I already clicked" chat | ☁️ Cloud, personal details removed | `startChat` + `sendMessageStream` |
-| Downloading the model | 🔒 | `initializeDeviceModel`, with a progress bar during setup |
+| Setting up Gemini Nano for the first time | 🔒 On your computer: Chrome downloads the model once and keeps it | `initializeDeviceModel`, with a progress bar during setup |
 
 A few choices made all the difference:
 
