@@ -5,7 +5,7 @@
 <h3 align="center">
   <a href="https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm">🧩 Add to Chrome</a> &nbsp;·&nbsp;
   <a href="https://scamouflage-37a72.web.app">▶️ Live web demo</a> &nbsp;·&nbsp;
-  <a href="#testing-guide">✅ Testing guide</a>
+  <a href="#testing-guide">✅ Setup instructions</a>
 </h3>
 
 ---
