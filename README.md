@@ -9,11 +9,6 @@
   <a href="#testing-guide">✅ Setup instructions</a>
 </h3>
 
-<p align="center">
-  <a href="https://youtu.be/DbJltFqxIac"><img src="docs/banners/video-thumbnail.png" width="640" alt="Watch the 3-minute Scamouflage demo on YouTube"></a><br>
-  <a href="https://youtu.be/DbJltFqxIac"><b>▶ Watch the 3-minute demo on YouTube</b></a>
-</p>
-
 ---
 
 <p align="center"><img src="docs/banners/readme-overview.svg" width="100%" alt="Overview"></p>
