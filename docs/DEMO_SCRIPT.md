@@ -178,7 +178,7 @@ Stills already made: `docs/banners/stats.webp` (hook), `docs/banners/architectur
 - Upload to YouTube as **Public**, 1080p. Title: *Scamouflage: a private scam checker for Gmail (Firebase AI Logic hybrid inference)*.
 - Add **English captions**: upload an `.srt` made from the voice-over above (the rules accept English audio, but captions help judges watching muted).
 - Check the length is **under 3:00**. Anything after 3:00 isn't evaluated.
-- Put the YouTube link in the Devpost video field and the README.
+- Put the YouTube link in the Devpost video field and the README. Published: https://youtu.be/DbJltFqxIac
 
 ## 6. Before you record
 

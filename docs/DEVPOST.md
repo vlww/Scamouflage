@@ -5,7 +5,7 @@ Re-render visuals: python3 scripts/banners/make.py && node scripts/banners/rende
 
 ![Scamouflage](https://raw.githubusercontent.com/vlww/Scamouflage/main/docs/banners/devpost-hero.gif)
 
-### **🧩 [Add to Chrome](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm)**  ·  **▶️ [Live web demo](https://scamouflage-37a72.web.app)**  ·  **💻 [Source code](https://github.com/vlww/Scamouflage)**  ·  **✅ [Testing guide](https://github.com/vlww/Scamouflage#testing-guide)**
+### **🧩 [Add to Chrome](https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm)**  ·  **▶️ [Live web demo](https://scamouflage-37a72.web.app)**  ·  **🎬 [Demo video](https://youtu.be/DbJltFqxIac)**  ·  **💻 [Source code](https://github.com/vlww/Scamouflage)**  ·  **✅ [Testing guide](https://github.com/vlww/Scamouflage#testing-guide)**
 
 ---
 

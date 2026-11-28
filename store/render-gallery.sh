@@ -13,6 +13,8 @@ shoot() { # page query out width height
 shoot ../scripts/banners/stats.html "bare=1" ../docs/banners/stats-still.png 1200 360
 shoot gallery.html "s=thumb" gallery/thumbnail.png 1500 1000
 echo gallery/thumbnail.png
+shoot gallery.html "s=thumb16" gallery/thumbnail-16x9.png 1280 720   # YouTube
+echo gallery/thumbnail-16x9.png
 for s in 1 2 3 4 5 6 7 8; do
   shoot gallery.html "s=$s" "gallery/gallery-$s.png" 1500 1000
   echo "gallery/gallery-$s.png"

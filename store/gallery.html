@@ -87,6 +87,15 @@ const SLIDES = {
 };
 document.getElementById('root').innerHTML = (SLIDES[q.get('s') || 'thumb'] || SLIDES.thumb)();
 if (q.get('s') === 'thumb') document.documentElement.style.setProperty('--scrim', 'linear-gradient(180deg, rgb(11 14 8 / 0.55), rgb(11 14 8 / 0.70))');
+// ?s=thumb16: the same thumbnail at 16:9 (1280×720, YouTube)
+if (q.get('s') === 'thumb16') {
+  document.documentElement.style.setProperty('--scrim', 'linear-gradient(180deg, rgb(11 14 8 / 0.55), rgb(11 14 8 / 0.70))');
+  for (const el of [document.documentElement, document.body]) { el.style.width = '1280px'; el.style.height = '720px'; }
+  document.getElementById('root').innerHTML = SLIDES.thumb();
+  const img = document.querySelector('.thumb img'); img.style.width = img.style.height = '250px';
+  const wm = document.querySelector('.thumb .wordmark'); wm.style.fontSize = '124px';
+  document.querySelector('.thumb').style.gap = '30px';
+}
 </script>
 </body>
 </html>

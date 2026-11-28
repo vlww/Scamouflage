@@ -5,8 +5,14 @@
 <h3 align="center">
   <a href="https://chromewebstore.google.com/detail/scamouflage/bcebmomgjaikeclnakgkkbdjmihdejgm">🧩 Add to Chrome</a> &nbsp;·&nbsp;
   <a href="https://scamouflage-37a72.web.app">▶️ Live web demo</a> &nbsp;·&nbsp;
+  <a href="https://youtu.be/DbJltFqxIac">🎬 Demo video</a> &nbsp;·&nbsp;
   <a href="#testing-guide">✅ Setup instructions</a>
 </h3>
+
+<p align="center">
+  <a href="https://youtu.be/DbJltFqxIac"><img src="docs/banners/video-thumbnail.png" width="640" alt="Watch the 3-minute Scamouflage demo on YouTube"></a><br>
+  <a href="https://youtu.be/DbJltFqxIac"><b>▶ Watch the 3-minute demo on YouTube</b></a>
+</p>
 
 ---
 
