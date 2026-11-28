@@ -13,9 +13,10 @@ import { getGenerativeModel, InferenceMode, InferenceSource } from 'firebase/ai'
 import { ai } from './firebase.js';
 import { cfg } from './config.js';
 import { prepareEmail } from './core/clean.js';
-import { runRecon } from './core/recon.js';
+import { runRecon, runTrust } from './core/recon.js';
+import { calibrate, calibratePartial } from './core/calibrate.js';
 import { redact, redactEmail } from './core/redact.js';
-import { VERDICT_SCHEMA, scanPrompt, imagePrompt, formatEmail, normalizeResult } from './core/prompt.js';
+import { VERDICT_SCHEMA, scanPrompt, imagePrompt, formatEmail, normalizeResult, DEFAULT_PROMPT_VERSION } from './core/prompt.js';
 import { parsePartialJson, parseFinalJson } from './core/partial-json.js';
 import { timer, logTimings } from './perf.js';
 
@@ -208,6 +209,13 @@ async function runStream(m, request, { onPartial, t, firstTokenMs = 60000, idleM
 
 /* ---------------- Public API ---------------- */
 
+/** Remote Config still says "v2" for older installs; 1.2+ treats the old default as "current default",
+ *  so a stale server value can't switch the sender-aware rubric off. Other values (v2-cautious…) pass through. */
+function promptVersion() {
+  const v = cfg('prompt_version');
+  return !v || v === 'v2' ? DEFAULT_PROMPT_VERSION : v;
+}
+
 /**
  * Scans an email.
  * opts: { allowCloud, onRecon, onPartial, onRoute, onRetry, onSlow, signal }
@@ -215,13 +223,17 @@ async function runStream(m, request, { onPartial, t, firstTokenMs = 60000, idleM
  * 'on_device' | 'in_cloud' | 'recon_only'.
  */
 export async function scanEmail(email, opts = {}) {
-  const { allowCloud = true, onRecon, onPartial, onRoute, onRetry, onSlow, signal } = opts;
+  const { allowCloud = true, onRecon, onRoute, onRetry, onSlow, signal } = opts;
   const t = timer();
 
-  // 1. Recon on the full email (instant first answer).
+  // 1. Recon on the full email (instant first answer), plus reassuring signs about the sender.
   const recon = runRecon(email);
+  const trust = runTrust(email, recon);
   t.mark('recon');
   onRecon?.(recon);
+  // What streams to the screen is calibrated the same way as the final answer, so a trusted
+  // sender's notice never flashes "Scam" first.
+  const onPartial = opts.onPartial && ((p, src) => opts.onPartial(calibratePartial(p, trust, email), src));
 
   // 2. Shrink the input.
   const prepared = prepareEmail(email, { maxBody: cfg('max_body_chars'), maxLinks: cfg('max_links') });
@@ -229,21 +241,23 @@ export async function scanEmail(email, opts = {}) {
 
   const avail = await deviceAvailability('text');
   t.mark('availability');
-  const version = cfg('prompt_version');
+  const version = promptVersion();
   const firstTokenMs = cfg('ondevice_timeout_ms');
   const stats = { inChars: 0, trimmedChars: prepared.trimmedChars, availability: avail };
 
   const finish = (text, source, redactedCount, note) => {
     t.mark('total');
-    const result = normalizeResult(parseFinalJson(text));
+    const raw = normalizeResult(parseFinalJson(text));
+    const result = calibrate(raw, trust, email);
     const timings = { ...t.marks, ...stats, outChars: text.length, source };
     logTimings(`scan (${source})`, timings);
-    return { result, source, redactedCount, recon, timings, note };
+    if (result.adjusted) console.info(`[Scamouflage] Calibrated ${result.adjusted.from} → ${result.verdict}: ${trust.reasons.join('; ')}`);
+    return { result, source, redactedCount, recon, trust, timings, note };
   };
 
   const cloudCall = async (note, { partial = onPartial, route = onRoute, abort = signal } = {}) => {
     const { email: safe, count } = redactEmail(prepared);
-    const prompt = scanPrompt(safe, recon.map((f) => ({ ...f, detail: redact(f.detail).text })), version);
+    const prompt = scanPrompt(safe, recon.map((f) => ({ ...f, detail: redact(f.detail).text })), version, trust);
     stats.inChars ||= prompt.length;
     route?.({ source: InferenceSource.IN_CLOUD, redactedCount: count, note });
     // PREFER_ON_DEVICE on purpose: the text is already redacted, so either route is private.
@@ -253,7 +267,7 @@ export async function scanEmail(email, opts = {}) {
   };
 
   if (avail === 'available') {
-    const prompt = scanPrompt(prepared, recon, version);
+    const prompt = scanPrompt(prepared, recon, version, trust);
     stats.inChars = prompt.length;
     onRoute?.({ source: InferenceSource.ON_DEVICE, redactedCount: 0 });
 
@@ -356,7 +370,7 @@ export async function scanEmail(email, opts = {}) {
   if (!allowCloud) {
     // Privacy-max mode without Nano: be honest and give the recon answer only.
     t.mark('total');
-    return { result: null, source: 'recon_only', redactedCount: 0, recon, timings: { ...t.marks, ...stats } };
+    return { result: null, source: 'recon_only', redactedCount: 0, recon, trust, timings: { ...t.marks, ...stats } };
   }
   return cloudCall(avail === 'unavailable' ? 'no_device' : 'downloading');
 }
@@ -366,7 +380,7 @@ export async function secondOpinion(email, recon, { onPartial } = {}) {
   const t = timer();
   const prepared = prepareEmail(email, { maxBody: cfg('max_body_chars') * 2, maxLinks: cfg('max_links') });
   const { email: safe, count } = redactEmail(prepared);
-  const prompt = scanPrompt(safe, recon, 'v2-cautious');
+  const prompt = scanPrompt(safe, recon, 'v2-cautious', runTrust(email, recon));
   const { text } = await runStream(model('text', InferenceMode.ONLY_IN_CLOUD), prompt, { onPartial, t, firstTokenMs: 30000 });
   t.mark('total');
   logTimings('second opinion (in_cloud)', t.marks);
@@ -389,7 +403,7 @@ export async function scanImage(base64, mimeType, opts = {}) {
   }
   onRoute?.({ source: onDevice ? InferenceSource.ON_DEVICE : InferenceSource.IN_CLOUD, redactedCount: 0, image: true });
   const m = model('image', onDevice ? InferenceMode.ONLY_ON_DEVICE : InferenceMode.ONLY_IN_CLOUD);
-  const request = [imagePrompt(cfg('prompt_version')), { inlineData: { data: base64, mimeType } }];
+  const request = [imagePrompt(promptVersion()), { inlineData: { data: base64, mimeType } }];
   const { text, source } = await runStream(m, request, { onPartial, t, firstTokenMs: onDevice ? 60000 : 30000 });
   t.mark('total');
   logTimings(`image scan (${source})`, t.marks);

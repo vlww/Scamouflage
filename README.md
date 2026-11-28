@@ -199,15 +199,25 @@ Firebase AI Logic does all the AI work. The other Firebase products keep it secu
 
 ## Accuracy
 
-The accuracy test uses 18 realistic, **made-up** messages ([`src/samples.js`](src/samples.js)): 11 scams (fake delivery fees, bank lockouts, gift-card "boss" requests, tech-support refunds, romance and crypto, changed invoice details, lottery wins, grandparent bail texts and more), 1 deliberately borderline sign-in alert, and 7 genuine messages, including a real security alert. `npm run eval` runs them through the exact prompt the product uses.
+The accuracy test uses 23 realistic, **made-up** messages ([`src/samples.js`](src/samples.js)):
+- **12 scams:** fake delivery fees, bank lockouts, gift-card "boss" requests, tech-support refunds, romance and crypto, changed invoice details, lottery wins, grandparent bail texts and more.
+- **1 deliberately borderline** sign-in alert.
+- **10 genuine messages**, including account notices that read like phishing: an expiring API key, a renewal reminder, a password reset you asked for.
+
+`npm run eval` runs them through the exact prompt and checks the product uses.
 
 | Route | Exact verdict | Scam vs. safe | Missed scams | False alarms | Speed |
 |---|---|---|---|---|---|
-| **On-device Gemini Nano** | **16/18** | **17/18** | **0** | 1 | verdict in 0.71 s |
-| Cloud, redacted | **17/18** | **18/18** | **0** | 0 | 1.1 s |
-| Quick rules only, no AI | 14/18 | 17/18 | 0 | 0 | ~1 ms |
+| **On-device Gemini Nano** | **23/23** | **23/23** | **0** | **0** | verdict in ~0.7 s |
+| Cloud, redacted | 22/23 | **23/23** | **0** | **0** | 1.2 s |
+| Quick rules only, no AI | 19/23 | 22/23 | 0 | 0 | ~1 ms |
 
-Nano's one false alarm was a cautious "Be careful" on a genuine sign-in alert. The eval led to one prompt fix (a notice from a company's own website that only points you to its official app is safe), which halved Nano's false alarms. Eighteen messages is a smoke test, not a benchmark.
+**What changed in 1.2.** Nano used to call genuine account notices scams, because "action required: your API key expires" reads like phishing. With the old prompt it flagged 4 of the 10 genuine messages. Version 1.2 adds a **sender check**:
+- **The sender is judged by its domain** (`mail.example.com` → `example.com`), not the random-looking part before the @.
+- **Reassuring signs are worked out locally and given to the model:** the sender's real domain, a name that matches it, and links that all stay on that domain.
+- **A small deterministic safety net** ([`src/core/calibrate.js`](src/core/calibrate.js)) corrects a "scam" based only on vague reasons when every check says the sender is genuine.
+
+This works because phishing has to send you somewhere else, or ask for money, codes or a call, so look-alike domains and outside links still get caught. Twenty-three messages is a smoke test, not a benchmark.
 
 ---
 
@@ -230,7 +240,7 @@ Nano's one false alarm was a cautious "Be careful" on a genuine sign-in alert. T
 
 | Command | What it does |
 |---|---|
-| `npm test` | 79 tests: redaction, quick rules, cleanup, streaming parser and the on-device/cloud race |
+| `npm test` | 94 tests: redaction, quick rules, the sender check, cleanup, streaming parser and the on-device/cloud race |
 | `npm run lint` · `npm run contrast` | Code checks · checks every color pair meets WCAG contrast |
 | `npm run eval` | The accuracy test above |
 | `npm run zip` · `npm run zip:judge` | Store build · build with Demo mode on |

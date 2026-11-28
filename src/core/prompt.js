@@ -4,7 +4,7 @@
 // verdict comes first (it streams out first and the UI can show it immediately). Instructions
 // live in the prompt text because on-device inference ignores systemInstruction.
 
-import { stripQuery } from './url.js';
+import { stripQuery, baseDomain } from './url.js';
 
 export const FLAG_TYPES = [
   'impersonation', 'link_mismatch', 'lookalike_domain', 'suspicious_link', 'urgency',
@@ -35,13 +35,14 @@ export const VERDICT_SCHEMA = {
 };
 
 const RUBRIC = {
-  // Default.
+  // Default since 1.2.0: v2 plus how to read the sender, so real account notices aren't flagged.
+  v3: `verdict: "scam" = phishing, fraud, impersonation, or asks for money, gift cards, crypto, passwords or codes. "suspicious" = warning signs but could be real. "safe" = ordinary mail (newsletters, receipts, reminders, account notices, personal notes) with no real warning signs. Judge the sender by its domain (after the @); long random-looking addresses are normal for automated mail. A notice from a company's own domain (an expiring key or password, a renewal, a sign-in alert, a receipt) whose links stay on that domain is safe unless it asks for money, gift cards, or a password or code by reply.`,
   v2: `verdict: "scam" = phishing, fraud, impersonation, or asks for money, gift cards, crypto, passwords or codes. "suspicious" = warning signs but could be real. "safe" = ordinary mail (newsletters, receipts, reminders, personal notes) with no real warning signs. A notice from a company's own domain that only points you to its official app or website, and asks for no money, passwords or codes, is safe.`,
   // Leans cautious: anything asking for money/credentials from an unverified sender is a scam.
   'v2-cautious': `verdict: "scam" = phishing, fraud, impersonation, or ANY request for money, gift cards, crypto, passwords, codes or remote access from a sender you cannot verify. "suspicious" = warning signs but could be real. "safe" = ordinary mail with no warning signs; a matching sender domain alone does not make a request for money safe.`,
 };
 export const PROMPT_VERSIONS = Object.keys(RUBRIC);
-export const DEFAULT_PROMPT_VERSION = 'v2';
+export const DEFAULT_PROMPT_VERSION = 'v3';
 
 const FORMAT = `confidence: 0-100, how sure you are that your verdict is right (an obviously normal email is "safe" with high confidence).
 why: one plain sentence for a worried non-technical reader, at most 12 words.
@@ -50,6 +51,15 @@ Reply with JSON only.`;
 
 function hintLines(recon = []) {
   return recon.length ? recon.slice(0, 5).map((f) => `- ${f.detail}`).join('\n') : '- none';
+}
+
+/** Automated mail often comes from addresses like no-reply-AP3ihr4GOFs_26uTAyRX3w@…; show just "no-reply-…". */
+export function tidyAddress(addr = '') {
+  const [local, domain] = addr.split('@');
+  if (!domain) return addr;
+  const tail = local.match(/^(.*[-.+])?([A-Za-z0-9_]{12,})$/);
+  const random = tail && tail[1] && tail[2].length >= 14 && /\d/.test(tail[2]) && /[a-z]/.test(tail[2]) && /[A-Z]/.test(tail[2]);
+  return random ? `${tail[1] || ''}…@${domain}` : addr;
 }
 
 /** Compact text form of a (cleaned) email. Links are shown as `text → host/path`. */
@@ -61,9 +71,11 @@ export function formatEmail(email) {
       return `- ${text && text !== dest ? `"${text}" → ` : ''}${dest}`;
     })
     .join('\n');
-  const from = [email.fromName, email.fromEmail && `<${email.fromEmail}>`].filter(Boolean).join(' ');
+  const from = [email.fromName, email.fromEmail && `<${tidyAddress(email.fromEmail)}>`].filter(Boolean).join(' ');
+  const domain = baseDomain((email.fromEmail || '').split('@')[1] || '');
   return [
     `From: ${from || '(unknown)'}`,
+    domain && `Sender domain: ${domain}`,
     `Subject: ${email.subject || '(none)'}`,
     links && `Links:\n${links}`,
     `Body:\n${email.body || ''}`,
@@ -72,12 +84,13 @@ export function formatEmail(email) {
     .join('\n');
 }
 
-export function scanPrompt(email, recon, version = DEFAULT_PROMPT_VERSION) {
+export function scanPrompt(email, recon, version = DEFAULT_PROMPT_VERSION, trust = null) {
+  const good = trust?.trusted ? `\nReassuring signs from local checks:\n${trust.reasons.map((r) => `- ${r}`).join('\n')}` : '';
   return `You check messages for scams.
 ${RUBRIC[version] || RUBRIC[DEFAULT_PROMPT_VERSION]}
 ${FORMAT}
-Quick local checks found (may be wrong):
-${hintLines(recon)}
+Warning signs from quick local checks (may be wrong):
+${hintLines(recon)}${good}
 
 <message>
 ${formatEmail(email)}

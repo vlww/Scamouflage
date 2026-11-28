@@ -92,7 +92,7 @@ export function runRecon(email) {
   if (brand && senderDomain && !compact(senderDomain).includes(compact(brand))) {
     add(
       'impersonation',
-      FREE_MAIL.test(senderDomain)
+      FREE_MAIL.test(senderBase)
         ? `Says "${title(brand)}" but sent from a personal ${senderDomain} account`
         : `Says "${title(brand)}" but sent from ${senderBase}`,
       { kind: 'sender' }
@@ -139,6 +139,59 @@ export function runRecon(email) {
   if (ATTACH_BAIT.test(text)) add('attachment', 'Risky attachment type', { kind: 'text', match: quote(ATTACH_BAIT) });
 
   return findings.sort((a, b) => b.weight - a.weight).slice(0, 8);
+}
+
+// Links that don't count against a sender: social profiles in footers, and the click-tracking /
+// unsubscribe domains of common email-delivery services.
+const NEUTRAL_LINK = new Set([
+  'facebook.com', 'instagram.com', 'x.com', 'twitter.com', 'linkedin.com', 'youtube.com', 'github.com',
+  'discord.com', 'discord.gg', 'tiktok.com', 'reddit.com', 'medium.com', 'threads.net', 'bsky.app',
+  'sendgrid.net', 'list-manage.com', 'mailchimp.com', 'mcusercontent.com', 'mandrillapp.com', 'mailgun.org',
+  'mailgun.net', 'sparkpostmail.com', 'awstrack.me', 'postmarkapp.com', 'exacttarget.com', 'rs6.net',
+  'createsend.com', 'cmail19.com', 'cmail20.com', 'customeriomail.com', 'hubspotlinks.com', 'hubspotemail.net',
+  'klclick.com', 'klaviyomail.com', 'mktomail.com', 'intercom-mail.com',
+]);
+// Registered look-alikes are often "brand-plus-service-word" domains: pinecrest-utilities-billing.com.
+const SERVICE_WORD = /(^|-)(billing|secure|security|verify|verification|alerts?|notify|notifications?|support|accounts?|login|signin|update|services?|help(desk)?|center|centre|team|payments?|pay|refunds?|claims?|confirm|online|portal|access|auth)(-|$)/;
+// Findings that rule out "this is just the company writing to you".
+const HARD = new Set(['impersonation', 'lookalike_domain', 'link_mismatch', 'suspicious_link', 'payment_request',
+  'secrecy', 'call_now', 'too_good_to_be_true', 'attachment', 'risky_domain']);
+
+/**
+ * Reassuring signs: is this mail plausibly just a company writing from its own domain?
+ * Judges the sender by its registrable domain (mail.example.com → example.com), not by the
+ * often random-looking part before the @. Phishing has to send you somewhere else (or ask for
+ * money, codes or a call) to work, so a sender whose links all stay on its own domain, with no
+ * hard warning signs, is treated as genuine. Returns { trusted, senderBase, nameMatch, reasons }.
+ */
+export function runTrust(email, findings = runRecon(email)) {
+  const fromEmail = (email.fromEmail || '').toLowerCase();
+  const senderDomain = fromEmail.split('@')[1] || '';
+  const senderBase = baseDomain(senderDomain);
+  const none = { trusted: false, senderBase, nameMatch: false, reasons: [] };
+  if (!senderBase || !senderBase.includes('.') || FREE_MAIL.test(senderBase) || RISKY_TLD.test(senderBase) || senderDomain.includes('xn--')) return none;
+  if (lookalikeOf(senderBase) || SERVICE_WORD.test(senderBase.split('.')[0])) return none;
+
+  const label = senderBase.split('.')[0];
+  const name = compact(email.fromName || '');
+  const nameMatch = label.length >= 4 && name.length >= 4 && (name.includes(label) || label.includes(name));
+
+  const bases = [...new Set((email.links || []).map((l) => baseDomain(hostOf(realUrl(l.href)))).filter(Boolean))];
+  const foreign = bases.filter((b) => b !== senderBase && !NEUTRAL_LINK.has(b));
+  const ownLinks = bases.includes(senderBase);
+  const linksAligned = bases.length > 0 && foreign.length === 0;
+
+  const hard = findings.some((f) => HARD.has(f.type));
+  // A request for a password or card details is only fine if the links go to the sender's own site.
+  const credsOk = !findings.some((f) => f.type === 'credential_request') || (linksAligned && ownLinks);
+  const trusted = !hard && credsOk && (linksAligned ? ownLinks || nameMatch : bases.length === 0 && nameMatch);
+  if (!trusted) return { ...none, nameMatch };
+
+  const reasons = [nameMatch ? `Sent from ${senderBase}, which matches the sender’s name` : `Sent from ${senderBase}`];
+  if (linksAligned) reasons.push(ownLinks ? `Every link goes to ${senderBase}` : 'Links only go to common, well-known sites');
+  else reasons.push('No links to other sites');
+  reasons.push('No request for money, gift cards or a phone call');
+  return { trusted, senderBase, nameMatch, reasons };
 }
 
 /** Instant, AI-free first answer from recon findings. */

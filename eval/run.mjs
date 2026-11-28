@@ -8,7 +8,8 @@
 // Needs VITE_APPCHECK_DEBUG_TOKEN in .env.local for the cloud run.
 import fs from 'node:fs';
 import { SAMPLES, toEmail } from '../src/samples.js';
-import { runRecon, reconVerdict } from '../src/core/recon.js';
+import { runRecon, runTrust, reconVerdict } from '../src/core/recon.js';
+import { calibrate } from '../src/core/calibrate.js';
 import { prepareEmail } from '../src/core/clean.js';
 import { redactEmail } from '../src/core/redact.js';
 import { scanPrompt, VERDICT_SCHEMA, normalizeResult, DEFAULT_PROMPT_VERSION } from '../src/core/prompt.js';
@@ -23,13 +24,14 @@ const modelName = opt('--model') || 'gemini-3.5-flash-lite';
 function build(s, { redacted }) {
   const email = toEmail(s);
   const recon = runRecon(email);
+  const trust = runTrust(email, recon);
   let prepared = prepareEmail(email);
   if (redacted) prepared = redactEmail(prepared).email;
-  return { email, recon, prompt: scanPrompt(prepared, recon, version) };
+  return { email, recon, trust, prompt: scanPrompt(prepared, recon, version, trust) };
 }
 
 if (opt('--export')) {
-  const out = SAMPLES.map((s) => ({ id: s.id, label: s.label, prompt: build(s, { redacted: false }).prompt }));
+  const out = SAMPLES.map((s) => { const b = build(s, { redacted: false }); return { id: s.id, label: s.label, prompt: b.prompt, trust: b.trust }; });
   fs.writeFileSync(opt('--export'), JSON.stringify({ schema: VERDICT_SCHEMA, items: out }));
   console.log(`Wrote ${out.length} prompts to ${opt('--export')}`);
   process.exit(0);
@@ -56,8 +58,10 @@ if (flag('--recon')) {
   });
   classify = async (s) => {
     const t0 = performance.now();
-    const res = await model.generateContent(build(s, { redacted: true }).prompt);
-    const r = normalizeResult(parseFinalJson(res.response.text()));
+    const b = build(s, { redacted: true });
+    const res = await model.generateContent(b.prompt);
+    const raw = normalizeResult(parseFinalJson(res.response.text()));
+    const r = flag('--raw') ? raw : calibrate(raw, b.trust, b.email); // the product applies calibration
     return { ...r, ms: Math.round(performance.now() - t0) };
   };
 }
@@ -97,9 +101,11 @@ export function report(rows, title) {
     binary += okBin;
     if (r.label === 'scam' && !risky(r.verdict)) missedScams++;
     if (r.label === 'safe' && risky(r.verdict)) falseAlarms++;
-    console.log(`${(okBin ? (ok ? '✓ ' : '~ ') : '✗ ') + r.id.padEnd(20)}${r.label.padEnd(12)}${String(r.verdict).padEnd(12)}${r.ms ?? ''}${r.error ? `  ${r.error}` : ''}`);
+    const got = r.adjusted ? `${r.verdict}*` : String(r.verdict);
+    console.log(`${(okBin ? (ok ? '✓ ' : '~ ') : '✗ ') + r.id.padEnd(20)}${r.label.padEnd(12)}${got.padEnd(12)}${r.ms ?? ''}${r.error ? `  ${r.error}` : ''}`);
   }
   const n = rows.length;
   const avg = Math.round(rows.reduce((a, r) => a + (r.ms || 0), 0) / n);
+  if (rows.some((r) => r.adjusted)) console.log('* corrected by the local sender check (calibrate.js)');
   console.log(`\nExact: ${exact}/${n} (${Math.round((100 * exact) / n)}%) · Risky-vs-safe: ${binary}/${n} (${Math.round((100 * binary) / n)}%) · Missed scams: ${missedScams} · False alarms: ${falseAlarms} · Avg ${avg} ms`);
 }

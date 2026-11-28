@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 
 export default [
-  { ignores: ['dist/**', 'dist-web/**', 'node_modules/**', '*.zip', '.firebase/**'] },
+  { ignores: ['dist/**', 'dist-web/**', 'node_modules/**', '*.zip', '.firebase/**', 'video/**'] },
   js.configs.recommended,
   {
     files: ['src/**/*.js', 'public/**/*.js', 'scripts/**/*.js'],

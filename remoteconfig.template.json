@@ -6,7 +6,7 @@
     "escalation_threshold": { "defaultValue": { "value": "70" }, "description": "Offer a cloud second opinion below this on-device confidence", "valueType": "NUMBER" },
     "ondevice_timeout_ms": { "defaultValue": { "value": "60000" }, "description": "How long to wait for the on-device model to start answering (it then may not go silent for more than 15 s)", "valueType": "NUMBER" },
     "hedge_ms": { "defaultValue": { "value": "5000" }, "description": "If on-device hasn't started answering a user-requested check by then, race a redacted cloud request", "valueType": "NUMBER" },
-    "prompt_version": { "defaultValue": { "value": "v2" }, "description": "Scan rubric: v2 | v2-cautious", "valueType": "STRING" },
+    "prompt_version": { "defaultValue": { "value": "v3" }, "description": "Scan rubric: v3 (default; reads the sender domain) | v2 | v2-cautious", "valueType": "STRING" },
     "feature_image_check": { "defaultValue": { "value": "true" }, "description": "Screenshot check on/off", "valueType": "BOOLEAN" },
     "feature_auto_scan": { "defaultValue": { "value": "true" }, "description": "Automatic checks when an email opens", "valueType": "BOOLEAN" },
     "feature_family": { "defaultValue": { "value": "true" }, "description": "Tell my family / Family view", "valueType": "BOOLEAN" }

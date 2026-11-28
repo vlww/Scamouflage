@@ -146,14 +146,14 @@ Scamouflage is a Chrome extension (Manifest V3) with a side panel, a background 
 
 **A quick first look.** Simple rules check for look-alike websites, links that don't go where they say, gift-card requests and pressure tactics in about **1 ms**, before the AI answers. Then, the AI determines whether something is actually a scam.
 
-**Testing accuracy.** 18 realistic messages were run through the exact prompt the app uses:
+**Testing accuracy.** 23 realistic messages were run through the exact prompt the app uses:
 
-| Route | Exact verdict | Scam vs. safe | Missed scams |
-|---|---|---|---|
-| On-device Gemini Nano | 16/18 | 17/18 | **0** |
-| Cloud, personal details removed | 17/18 | 18/18 | **0** |
+| Route | Exact verdict | Scam vs. safe | Missed scams | False alarms |
+|---|---|---|---|---|
+| On-device Gemini Nano | 23/23 | 23/23 | **0** | **0** |
+| Cloud, personal details removed | 22/23 | 23/23 | **0** | **0** |
 
-The test showed Nano flagging some real security notices as suspicious. Adjusting the prompt halved those false alarms.
+Nano used to call genuine account notices scams. An "action required: your API key expires" email reads like phishing. A sender check fixed that: it judges the sender by its real domain, and checks whether every link stays on that domain. Phishing has to send you somewhere else, so it still gets caught.
 
 **The rest of the Firebase stack** keeps it secure, tunable and social:
 
@@ -165,7 +165,7 @@ The test showed Nano flagging some real security notices as suspicious. Adjustin
 | **Cloud Firestore** | Stores family groups and shared warnings. Security rules only let you add yourself to a family. |
 | **Hosting** | Hosts the web app and landing page. |
 
-On top of that, there are 79 automated tests, code linting, and a script that checks every color combination is easy to read.
+On top of that, there are 94 automated tests, code linting, and a script that checks every color combination is easy to read.
 
 ---
 

@@ -456,7 +456,7 @@ async function runScan({ auto }) {
     }
     setStep('stepDone');
     renderFinal();
-    const entry = { result: out.result, source: out.source, redactedCount: out.redactedCount, recon: out.recon, timings: out.timings, note: out.note };
+    const entry = { result: out.result, source: out.source, redactedCount: out.redactedCount, recon: out.recon, trust: out.trust, timings: out.timings, note: out.note };
     if (key) setCached(key, entry);
     saveThreadResult(email, entry);
     if (tabId != null) showVerdict(tabId, key, 3, { phase: 'done', verdict: out.result.verdict, source: out.source });
@@ -526,7 +526,7 @@ function renderFinal() {
   renderDetails();
   document.querySelector('.more-actions').hidden = false;
   $('detailsBox').hidden = false;
-  $('secondBtn').hidden = !(cur.source === 'on_device' && !cur.image && !cur.second && state.settings.cloudHelp && (r.verdict !== 'safe' || r.confidence < cfg('escalation_threshold')));
+  $('secondBtn').hidden = !(cur.source === 'on_device' && !cur.image && !cur.second && state.settings.cloudHelp && (r.verdict !== 'safe' || r.adjusted || r.confidence < cfg('escalation_threshold')));
   $('familyBtn').hidden = r.verdict === 'safe' || !cfg('feature_family');
   $('debriefBtn').lastChild.textContent = r.verdict === 'safe' ? 'Ask a question' : 'What should I do?';
   updateScanButton();
@@ -682,15 +682,21 @@ function renderDetails() {
     cur.note && ['Why cloud', NOTE_TEXT[cur.note] || cur.note],
     t.verdict != null && ['Verdict in', `${(t.verdict / 1000).toFixed(1)}s`],
     t.total != null && ['Total time', `${(t.total / 1000).toFixed(1)}s`],
+    cur.result?.adjusted && ['Adjusted', `The AI said “${VERDICT_WORD[cur.result.adjusted.from] || cur.result.adjusted.from}”, but the sender check overruled it`],
     cur.fromCache && ['Result', 'Saved from earlier'],
   ].filter(Boolean);
   body.append(h('dl', { class: 'kv' }, rows.flatMap(([k, v]) => [h('dt', { text: k }), h('dd', { text: v })])));
+  if (cur.trust?.trusted) {
+    body.append(h('div', { class: 'muted', text: 'Reassuring signs:' }));
+    body.append(h('ul', {}, cur.trust.reasons.map((r) => h('li', { text: r }))));
+  }
   const recon = cur.recon || [];
   if (recon.length) {
     body.append(h('div', { class: 'muted', text: 'Quick checks that fired:' }));
     body.append(h('ul', {}, recon.map((f) => h('li', { text: f.detail }))));
   }
 }
+const VERDICT_WORD = { scam: 'Scam', suspicious: 'Be careful?', safe: 'Looks safe' };
 const NOTE_TEXT = {
   no_device: 'This Chrome doesn’t have the built-in AI model.',
   downloading: 'The built-in AI model is still downloading.',

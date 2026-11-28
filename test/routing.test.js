@@ -36,7 +36,7 @@ vi.mock('firebase/ai', () => {
           throw new Error(`${source} broke`);
         }
         await sleep(b.start, opts?.signal);
-        const json = JSON.stringify({ verdict: b.verdict || 'scam', confidence: 90, why: `from ${source}`, flags: [] });
+        const json = JSON.stringify({ verdict: b.verdict || 'scam', confidence: 90, why: `from ${source}`, flags: b.flags || [] });
         async function* stream() {
           for (const part of [json.slice(0, 20), json.slice(20)]) {
             await sleep(5, opts?.signal);
@@ -169,5 +169,25 @@ describe('scanEmail routing', () => {
     } finally {
       globalThis.LanguageModel.availability = async () => 'available';
     }
+  });
+
+  it('a trusted company notice is corrected end to end, including what streams to the screen', async () => {
+    const notice = {
+      fromName: 'Lumenworks', fromEmail: 'no-reply-AP3ihr4GOFs_26uTAyRX3w@mail.lumenworks.dev',
+      subject: 'Your API key is expiring soon', body: 'Action required: create a new key before it expires.',
+      links: [{ text: 'Manage keys', href: 'https://console.lumenworks.dev/settings/keys' }],
+    };
+    behaviour.on_device = { start: 10, verdict: 'suspicious', flags: [{ type: 'urgency', text: 'Pressures you to act' }] };
+    behaviour.in_cloud = { start: 10 };
+    const shown = [];
+    const out = await scanEmail(notice, { allowCloud: false, onPartial: (p) => shown.push(p.verdict) });
+    expect(out.source).toBe('on_device');
+    expect(out.trust.trusted).toBe(true);
+    expect(out.result.verdict).toBe('safe');
+    expect(out.result.adjusted).toEqual({ from: 'suspicious' });
+    expect(shown.length).toBeGreaterThan(0);
+    expect(shown.every((v) => v === 'safe')).toBe(true);
+    expect(calls[0].request).toMatch(/Sender domain: lumenworks\.dev/);
+    expect(calls[0].request).toMatch(/Judge the sender by its domain/); // v3, even though Remote Config says v2
   });
 });

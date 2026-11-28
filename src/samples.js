@@ -276,6 +276,78 @@ If this was you, you don't need to do anything. If not, open the Lumen Cloud app
 – The Lumen Cloud team
 https://lumencloud.com/security`,
   },
+  // Genuine account notices that read like phishing: the sender's own domain is the tell.
+  {
+    id: 'api-key-expiry',
+    title: 'API key expiring',
+    label: 'safe',
+    from: 'Lumenworks <no-reply-Xk29Qp7LmR3zT_8vWb2Ycq@mail.lumenworks.dev>',
+    subject: 'Action required: your API key expires in 7 days',
+    body: `Hi there,
+
+The API key "production-server" on your Lumenworks account expires in 7 days. After that, requests using this key will fail.
+
+To keep your integration working, create a new key and update your app before it expires:
+https://console.lumenworks.dev/settings/keys
+
+Read more about key rotation: https://docs.lumenworks.dev/keys
+
+– The Lumenworks team
+Lumenworks, 400 Harbor St, Springfield`,
+  },
+  {
+    id: 'renewal-notice',
+    title: 'Subscription renewal',
+    label: 'safe',
+    from: 'Brightpath Streaming <billing@brightpath.tv>',
+    subject: 'Your annual plan renews on December 3',
+    body: `Your Brightpath Premium annual plan renews on December 3 for $59.99, charged to the card ending in 4421.
+
+No action is needed. To change or cancel your plan, visit https://brightpath.tv/account/plan
+
+Questions? https://help.brightpath.tv`,
+  },
+  {
+    id: 'password-reset-real',
+    title: 'Password reset (requested)',
+    label: 'safe',
+    from: 'Tidewater Notes <accounts-noreply@tidewater.app>',
+    subject: 'Reset your password',
+    body: `Someone (hopefully you) asked to reset the password for your Tidewater Notes account.
+
+To choose a new password, use this link within 1 hour:
+https://accounts.tidewater.app/reset?token=sample
+
+If you didn't ask for this, you can ignore this email. Your password won't change.
+
+Follow us: https://x.com/tidewaternotes`,
+  },
+  // …and the phishing versions of the same notices.
+  {
+    id: 'api-key-phish',
+    title: 'API key phish',
+    label: 'scam',
+    from: 'Lumenworks Security <alerts@lumenworks-security.top>',
+    subject: 'URGENT: your API key will be revoked in 24 hours',
+    body: `We detected unusual activity on your Lumenworks account. Your API key will be revoked in 24 hours.
+
+Verify your account and re-enter your billing details to keep access:
+https://lumenworks-verify.top/login
+
+Lumenworks Security Team`,
+  },
+  {
+    id: 'renewal-phish',
+    title: 'Fake renewal failure',
+    label: 'scam',
+    from: 'Brightpath Billing <brightpath.billing.team@gmail.com>',
+    subject: 'Payment declined: your account will be suspended',
+    body: `We were unable to process your payment. Your Brightpath account will be suspended today.
+
+Update your payment method immediately to avoid losing access: https://bit.ly/brightpath-pay
+
+Brightpath Billing`,
+  },
 ];
 
 export const DEMO_SAMPLES = SAMPLES.filter((s) => s.demo);
